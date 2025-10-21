@@ -30,6 +30,7 @@ httpcore==1.0.9
 httplib2==0.30.0
 httpx==0.28.1
 httpx-sse==0.4.1
+ipywidgets==8.1.7
 idna==3.10
 jiter==0.10.0
 jsonpatch==1.33
@@ -43,6 +44,7 @@ marshmallow==3.26.1
 multidict==6.6.4
 markdownify==0.10.0
 mypy_extensions==1.1.0
+notebook==7.4.7
 numpy==2.3.2
 openai==1.105.0
 orjson==3.11.3
