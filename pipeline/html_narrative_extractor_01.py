@@ -179,7 +179,14 @@ def _process_html_headers(html_content: str, html_file: Path, verbose: bool = Tr
             r'(h[0-9])\s*\{\s*--heading-prefix\s*:\s*"([0-9]+(?:\.[0-9]+)*)"', 
             style_tag.text
         )
-        
+
+        # We also want to check if the CSS styling is present in the HTML file and if not then we need to add a digit to the first header present
+        css_style_tag = None
+        for tag in soup.find_all("style", attrs={'type': 'text/css'}):
+            if 'h2:before{color:silver;counter-increment:section;content:var(--heading-prefix) " ";}' in tag.text:
+                css_style_tag = tag.text
+                break
+            
         if not h_prefix_match:
             return html_content
             
@@ -187,16 +194,20 @@ def _process_html_headers(html_content: str, html_file: Path, verbose: bool = Tr
         starting_header_level = int(h_prefix_match.group(1)[1:])
         prev_level = starting_header_level - 1
         header_list = [int(x) for x in h_prefix_match.group(2).split('.')]
+
+        # If the CSS styling is not present, we want to add a 1 as a digit (see 14.2.1 in US Core IG)
+        if css_style_tag == None:
+            header_list.append(1)
         
         # Process all headers in the document
         for header in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
             header_level = int(header.name[1:])
             
             # Adjust header numbering based on level changes
-            header_list = _update_header_numbering(header_list, header_level, prev_level)
+            header_list = _update_header_numbering(header_list, header_level, prev_level, starting_header_level)
             
             # Create the numbered header text
-            header_number = ".".join(str(x) for x in header_list[:header_level])
+            header_number = ".".join(str(x) for x in header_list)
             markdown_header = " ".join([
                 "#" * header_level, 
                 header_number, 
@@ -215,33 +226,30 @@ def _process_html_headers(html_content: str, html_file: Path, verbose: bool = Tr
             print("Falling back to original HTML content...")
         return html_content
 
-
-def _update_header_numbering(header_list: list, current_level: int, prev_level: int) -> list:
+def _update_header_numbering(header_list: list, current_level: int, prev_level: int, starting_header_level: int) -> list:
     """
     Update the header numbering list based on the current and previous header levels.
-    
+
     Args:
         header_list: Current list of header numbers at each level
         current_level: The level of the current header (1-6)
         prev_level: The level of the previous header
-        
+        starting_header_level: The level of the header prefix
+
     Returns:
         Updated header numbering list
     """
-    if current_level > prev_level:
-        # Going deeper - extend the list with zeros if needed
-        while len(header_list) < current_level:
-            header_list.append(0)
-    elif current_level < prev_level:
-        # Going shallower - trim the list
-        header_list = header_list[:current_level]
-    
-    # Increment the counter at current level
-    if len(header_list) >= current_level:
-        header_list[current_level - 1] += 1
-    else:
-        header_list.append(1)
-    
+    # Base base - if the header level is the same as the starting level, then nothing changes
+    if current_level != starting_header_level:
+        if prev_level == current_level:
+            header_list[-1] += 1
+        elif prev_level > current_level:
+            # Chop off the last digit and increment the new last digit
+            header_list = header_list[:-1] # or try .pop if this doesn't work
+            header_list[-1] += 1
+        elif prev_level < current_level:
+            # Add a 1 to the end
+            header_list.append(1)
     return header_list
 
 
