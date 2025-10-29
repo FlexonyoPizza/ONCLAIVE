@@ -1,9 +1,7 @@
 .DS_Store
 .env
-test_kit_dev/test_plan_output/
-test_kit_dev/test_output/
-reqs_extraction/initial_reqs_output/
-reqs_extraction/revised_reqs_output/
-pipeline/checkpoints/
 .ipynb_checkpoints/
-__pycache__/
+pipeline/__pycache__
+pipeline/checkpoints
+reports
+reports_plannet_test_plan

@@ -52,6 +52,7 @@ orjson==3.11.3
 packaging==25.0
 pandas==2.2.3
 pipenv==2025.0.4
+pip_system_certs==5.3
 platformdirs==4.4.0
 propcache==0.3.2
 proto-plus==1.26.1
