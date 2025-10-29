@@ -50,7 +50,7 @@ def setup_environment(project_root: str = None) -> Dict[str, Any]:
         RuntimeError: If prompt environment setup fails
     """
     if project_root is None:
-        project_root = Path.cwd().parent
+        project_root = Path(__file__).parent.parent
     else:
         project_root = Path(project_root)
     

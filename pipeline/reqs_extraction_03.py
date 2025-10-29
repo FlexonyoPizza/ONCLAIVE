@@ -16,7 +16,7 @@ import prompt_utils
 from llm_utils import SafetyFilterException
 
 # Get the current working directory and set up paths
-PROJECT_ROOT = Path.cwd().parent  # Go up one level from reqs_extraction to onclaive root
+PROJECT_ROOT = Path(__file__).parent.parent  # Go up one level from reqs_extraction to onclaive root
 
 SYSTEM_PROMPTS = {
     "claude": """You are a seasoned Healthcare Integration Test Engineer with expertise in INCOSE Systems Engineering standards, 

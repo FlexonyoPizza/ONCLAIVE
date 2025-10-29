@@ -39,7 +39,7 @@ import llm_utils
 import prompt_utils
 
 # Constants
-PROJECT_ROOT = Path.cwd().parent
+PROJECT_ROOT = Path(__file__).parent.parent
 CURRENT_DIR = Path.cwd()
 
 # System prompt for test plan generation

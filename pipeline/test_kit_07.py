@@ -40,7 +40,7 @@ import prompt_utils
 # Constants
 CURRENT_DIR = Path.cwd()
 OUTPUT_DIR = os.path.join(CURRENT_DIR, 'test_output')
-PROJECT_ROOT = CURRENT_DIR.parent
+PROJECT_ROOT = Path(__file__).parent.parent
 TEST_GEN_PATH = PROJECT_ROOT / "prompts" / "test_gen.md"
 
 # System prompts for test generation
