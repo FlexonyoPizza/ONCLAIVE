@@ -51,6 +51,7 @@ openai==1.105.0
 orjson==3.11.3
 packaging==25.0
 pandas==2.2.3
+pip-system-certs==5.3
 pipenv==2025.0.4
 platformdirs==4.4.0
 propcache==0.3.2
