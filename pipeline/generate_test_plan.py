@@ -21,7 +21,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 working_directory = os.getcwd()
 
-base_artifacts_path = "../demo-artifacts"
+base_artifacts_path = "../artifacts-demo"
 
 # Set logging level to reduce noise
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)

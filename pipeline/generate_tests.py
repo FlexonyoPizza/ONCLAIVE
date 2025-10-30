@@ -14,7 +14,7 @@ llm_clients = llm_utils.LLMApiClient()
 
 working_directory = os.getcwd()
 
-base_artifacts_path = "../demo-artifacts"
+base_artifacts_path = "../artifacts-demo"
 
 # Faster generation- no LLM self evaluation
 test_kit_07.generate_inferno_test_kit(

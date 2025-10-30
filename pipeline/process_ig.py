@@ -11,11 +11,12 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from glob import glob
 
+# TODO: remove this
 llm_clients = llm_utils.LLMApiClient()
 
 working_directory = os.getcwd()
 
-base_artifacts_path = "../demo-artifacts"
+base_artifacts_path = "../artifacts-demo"
 
 # Process directory with default settings
 result = html_narrative_extractor_01.convert_local_html_to_markdown(

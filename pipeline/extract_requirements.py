@@ -16,7 +16,7 @@ llm_clients = llm_utils.LLMApiClient()
 
 working_directory = os.getcwd()
 
-base_artifacts_path = "../demo-artifacts"
+base_artifacts_path = "../artifacts-demo"
 
 reqs_extraction_03.run_requirements_extractor(
     markdown_dir=os.path.join(working_directory, base_artifacts_path, "ig", "cleaned_markdown"),
