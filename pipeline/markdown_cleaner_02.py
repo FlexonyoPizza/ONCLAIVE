@@ -141,7 +141,7 @@ def _apply_final_cleanup(content: str) -> str:
     return content
 
 
-def process_directory(input_dir: str, output_dir: str) -> dict:
+def process_directory(input_dir: str = str(path_helpers.demo_artifacts_path())) -> dict:
     """
     Process all markdown files in a directory and save cleaned versions.
     
@@ -167,8 +167,9 @@ def process_directory(input_dir: str, output_dir: str) -> dict:
         >>> result = process_directory('input_md', 'cleaned_md')
         >>> print(f"Processed {result['successful']}/{result['total_files']} files")
     """
-    # Validate input directory
-    input_path = Path(input_dir)
+    input_path = Path(input_dir) / "ig" / "converted_markdown"
+    output_path = Path(input_dir) / "ig" / "cleaned_markdown"
+
     if not input_path.exists():
         raise FileNotFoundError(f"Input directory not found: {input_dir}")
     
@@ -185,17 +186,17 @@ def process_directory(input_dir: str, output_dir: str) -> dict:
     failed_files = []
     
     for file_path in md_files:
-        output_path = Path(output_dir) / file_path.name
+        output_file_path = output_path / file_path.name
         cleaned_content = clean_markdown_file(str(file_path))
         
         if cleaned_content:
             try:
-                with open(output_path, 'w', encoding='utf-8') as out_file:
+                with open(output_file_path, 'w', encoding='utf-8') as out_file:
                     out_file.write(cleaned_content)
                 successful += 1
-                print(f"Cleaned and saved: {output_path}")
+                print(f"Cleaned and saved: {output_file_path}")
             except Exception as e:
-                print(f"Error writing {output_path}: {str(e)}")
+                print(f"Error writing {output_file_path}: {str(e)}")
                 failed += 1
                 failed_files.append(str(file_path))
         else:
