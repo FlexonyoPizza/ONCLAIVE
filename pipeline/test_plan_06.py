@@ -39,7 +39,7 @@ import llm_utils
 import prompt_utils
 
 # Constants
-PROJECT_ROOT = Path(__file__).parent.parent
+# TODO: remove
 CURRENT_DIR = Path.cwd()
 
 # System prompt for test plan generation
@@ -47,7 +47,7 @@ SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in
 Your task is to analyze FHIR Implementation Guide requirements and generate practical, implementable test specifications."""
 
 # Setup the prompt environment
-prompt_env = prompt_utils.setup_prompt_environment(PROJECT_ROOT)
+prompt_env = prompt_utils.setup_prompt_environment()
 PROMPT_DIR = prompt_env["prompt_dir"]
 TEST_PLAN_PATH = prompt_env["test_plan_gen_path"]
 REQUIREMENT_GROUPING_PATH = prompt_env["requirement_grouping_path"]
@@ -450,6 +450,7 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
         Exception: For various processing errors
     """
     # Set up output directory
+    # TODO: address this
     if output_dir is None:
         output_dir = Path(CURRENT_DIR, 'test_plan_output')
     else:

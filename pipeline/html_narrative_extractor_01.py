@@ -64,6 +64,7 @@ def convert_local_html_to_markdown(
         raise FileNotFoundError(f"Input directory not found: {input_dir}")
     
     # Create output directory
+    # TODO: address this
     os.makedirs(output_dir, exist_ok=True)
     
     # Use default patterns if none provided

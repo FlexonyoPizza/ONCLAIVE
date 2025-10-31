@@ -23,6 +23,7 @@ import os
 import logging
 import time
 from pathlib import Path
+import path_helpers
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timedelta
 import re
@@ -35,13 +36,10 @@ logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-def setup_environment(project_root: str = None) -> Dict[str, Any]:
+def setup_environment() -> Dict[str, Any]:
     """
     Set up the environment for requirements refinement.
     
-    Args:
-        project_root: Path to project root directory. If None, auto-detected.
-        
     Returns:
         Dictionary containing paths and utilities needed for processing
         
@@ -49,20 +47,15 @@ def setup_environment(project_root: str = None) -> Dict[str, Any]:
         FileNotFoundError: If required files (llm_utils.py, prompt_utils.py) are not found
         RuntimeError: If prompt environment setup fails
     """
-    if project_root is None:
-        project_root = Path(__file__).parent.parent
-    else:
-        project_root = Path(project_root)
-    
     # Load environment variables
     load_dotenv()
     
     # Add project root to sys.path for imports
-    if str(project_root) not in sys.path:
-        sys.path.insert(0, str(project_root))
+    if str(path_helpers.project_root()) not in sys.path:
+        sys.path.insert(0, str(path_helpers.project_root()))
     
     # Import LLM utils with better error handling
-    llm_utils_path = project_root / 'pipeline' / 'llm_utils.py'
+    llm_utils_path = path_helpers.project_root() / 'pipeline' / 'llm_utils.py'
     if not llm_utils_path.exists():
         raise FileNotFoundError(f"llm_utils.py not found at {llm_utils_path}")
     
@@ -71,7 +64,7 @@ def setup_environment(project_root: str = None) -> Dict[str, Any]:
     spec.loader.exec_module(llm_utils)
     
     # Import prompt utilities with better error handling
-    prompt_utils_path = project_root / 'pipeline' / 'prompt_utils.py'
+    prompt_utils_path = path_helpers.project_root() / 'pipeline' / 'prompt_utils.py'
     if not prompt_utils_path.exists():
         raise FileNotFoundError(f"prompt_utils.py not found at {prompt_utils_path}")
     
@@ -81,7 +74,7 @@ def setup_environment(project_root: str = None) -> Dict[str, Any]:
     
     # Setup the prompt environment
     try:
-        prompt_env = prompt_utils.setup_prompt_environment(project_root)
+        prompt_env = prompt_utils.setup_prompt_environment()
     except Exception as e:
         raise RuntimeError(f"Failed to setup prompt environment: {e}")
     
@@ -93,7 +86,6 @@ def setup_environment(project_root: str = None) -> Dict[str, Any]:
     }
     
     return {
-        "project_root": project_root,
         "llm_utils": llm_utils,
         "prompt_utils": prompt_utils,
         "prompt_env": prompt_env,
@@ -447,8 +439,7 @@ def count_requirements_in_markdown(markdown_text: str) -> int:
 
 
 def refine_requirements(input_file: str, api_type: str = "claude", 
-                       output_dir: str = None, project_root: str = None,
-                       client_instance=None) -> Dict[str, Any]:
+                       output_dir: str = None, client_instance=None) -> Dict[str, Any]:
     """
     Refine requirements using the specified API with token limit handling.
     
@@ -456,7 +447,6 @@ def refine_requirements(input_file: str, api_type: str = "claude",
         input_file: Path to the input requirements list markdown file
         api_type: The API to use ("claude", "gemini", or "gpt")
         output_dir: Directory to save the output (optional, uses default if None)
-        project_root: Path to project root (optional, auto-detected if None)
         client_instance: Pre-initialized LLM client instance (optional)
         
     Returns:
@@ -469,7 +459,7 @@ def refine_requirements(input_file: str, api_type: str = "claude",
     """
     # Setup environment
     try:
-        env = setup_environment(project_root)
+        env = setup_environment()
     except Exception as e:
         raise RuntimeError(f"Failed to setup environment: {e}")
     
@@ -732,7 +722,7 @@ def count_requirements_in_output(output: str) -> int:
 
 def batch_process_requirements(input_file: str, output_dir: str, client_instance, 
                              batch_size: int = 100, api_type: str = "claude", 
-                             project_root: str = None) -> Dict[str, Any]:
+                             ) -> Dict[str, Any]:
     """
     Process requirements in batches of specified size for handling large requirement sets.
     
@@ -742,8 +732,7 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
         client_instance: LLM client instance
         batch_size: Number of requirements per batch (default: 100)
         api_type: API to use ('claude', 'gemini', 'gpt')
-        project_root: Project root path (optional)
-    
+
     Returns:
         Dictionary containing processing results including timing and success metrics
         
@@ -761,7 +750,7 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
     
     # Setup environment to get prompt utilities
     try:
-        env = setup_environment(project_root)
+        env = setup_environment()
     except Exception as e:
         raise RuntimeError(f"Failed to setup environment: {e}")
     
@@ -912,7 +901,7 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
 def run_batch_requirements_refinement(input_file: str, client_instance, 
                                      output_dir: str = "checkpoints/revised_reqs_extraction",
                                      batch_size: int = 100, api_type: str = "claude",
-                                     project_root: str = None) -> Dict[str, Any]:
+                                     ) -> Dict[str, Any]:
     """
     Convenience function to run batch processing with existing setup.
     
@@ -922,8 +911,7 @@ def run_batch_requirements_refinement(input_file: str, client_instance,
         output_dir: Output directory (default: "checkpoints/revised_reqs_extraction")
         batch_size: Requirements per batch (default: 100)
         api_type: API to use (default: "claude")
-        project_root: Project root path (optional)
-        
+
     Returns:
         Dictionary containing processing results
         
@@ -941,5 +929,4 @@ def run_batch_requirements_refinement(input_file: str, client_instance,
         client_instance=client_instance,
         batch_size=batch_size,
         api_type=api_type,
-        project_root=project_root
     )

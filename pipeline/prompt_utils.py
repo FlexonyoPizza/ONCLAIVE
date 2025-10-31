@@ -4,6 +4,7 @@ Utility functions for loading and managing prompts from external markdown files.
 import os
 import logging
 from pathlib import Path
+import path_helpers
 from typing import Dict, Any, Optional
 
 def load_prompt(prompt_path: str, **kwargs) -> str:
@@ -34,18 +35,15 @@ def load_prompt(prompt_path: str, **kwargs) -> str:
         logging.error(f"Error loading prompt from {prompt_path}: {str(e)}")
         raise
 
-def setup_prompt_environment(project_root: Path) -> Dict[str, Any]:
+def setup_prompt_environment() -> Dict[str, Any]:
     """
     Setup the prompt environment by creating directories and returning paths.
     
-    Args:
-        project_root: Path to the project root directory
-        
     Returns:
         dict: Dictionary containing prompt-related paths
     """
     # Define prompt directory
-    prompt_dir = os.path.join(project_root, 'prompts')
+    prompt_dir = os.path.join(path_helpers.project_root(), 'prompts')
     
     # Create prompt directory if it doesn't exist
     os.makedirs(prompt_dir, exist_ok=True)

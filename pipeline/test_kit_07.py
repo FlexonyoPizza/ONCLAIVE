@@ -29,6 +29,7 @@ Usage:
 import re
 import os
 import logging
+import path_helpers
 import time
 from datetime import datetime
 from pathlib import Path
@@ -39,9 +40,9 @@ import prompt_utils
 
 # Constants
 CURRENT_DIR = Path.cwd()
+# TODO: handle this
 OUTPUT_DIR = os.path.join(CURRENT_DIR, 'test_output')
-PROJECT_ROOT = Path(__file__).parent.parent
-TEST_GEN_PATH = PROJECT_ROOT / "prompts" / "test_gen.md"
+TEST_GEN_PATH = path_helpers.project_root() / "prompts" / "test_gen.md"
 
 # System prompts for test generation
 INFERNO_TEST_SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
@@ -227,7 +228,7 @@ def get_dsl_guidance() -> str:
     Returns:
         String containing Inferno DSL guidance for test development
     """
-    guidance_path = PROJECT_ROOT / "pipeline" / "dsl-guidance.md"
+    guidance_path = path_helpers.project_root() / "pipeline" / "dsl-guidance.md"
     
     with open(guidance_path, 'r', encoding='utf-8') as f:
         return f.read()

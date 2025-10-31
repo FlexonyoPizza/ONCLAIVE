@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 import re
 import pandas as pd
+import path_helpers
 from dotenv import load_dotenv
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from anthropic import Anthropic, RateLimitError
@@ -14,9 +15,6 @@ from openai import OpenAI
 from pathlib import Path
 import prompt_utils
 from llm_utils import SafetyFilterException
-
-# Get the current working directory and set up paths
-PROJECT_ROOT = Path(__file__).parent.parent  # Go up one level from reqs_extraction to onclaive root
 
 SYSTEM_PROMPTS = {
     "claude": """You are a seasoned Healthcare Integration Test Engineer with expertise in INCOSE Systems Engineering standards, 
@@ -30,10 +28,10 @@ SYSTEM_PROMPTS = {
 }
 
 # Basic setup
-load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
+load_dotenv(os.path.join(path_helpers.project_root(), '.env'))
 
 # Setup the prompt environment
-prompt_env = prompt_utils.setup_prompt_environment(PROJECT_ROOT)
+prompt_env = prompt_utils.setup_prompt_environment()
 PROMPT_DIR = prompt_env["prompt_dir"]
 REQUIREMENTS_EXTRACTION_PATH = prompt_env["requirements_extraction_path"]
 
@@ -304,7 +302,7 @@ def process_markdown_content_for_incose_srs(
     
     # Use default output directory if none provided
     if output_dir is None:
-        output_dir = os.path.join(PROJECT_ROOT, 'reqs_extraction', 'initial_reqs_output')
+        output_dir = os.path.join(path_helpers.project_root(), 'reqs_extraction', 'initial_reqs_output')
     
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
