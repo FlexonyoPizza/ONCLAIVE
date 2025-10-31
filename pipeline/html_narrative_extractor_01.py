@@ -8,6 +8,7 @@ with special handling for hierarchical header numbering from CSS styles.
 from bs4 import BeautifulSoup
 import os
 from pathlib import Path
+import path_helpers
 from langchain_community.document_transformers import MarkdownifyTransformer
 from langchain.schema import Document
 import re
@@ -25,9 +26,8 @@ DEFAULT_EXCLUDE_PATTERNS = [
 
 
 def convert_local_html_to_markdown(
-    input_dir: str, 
-    output_dir: str = "markdown_output", 
-    exclude_patterns: list = None, 
+    input_dir: str = str(path_helpers.demo_artifacts_path()),
+    exclude_patterns: list = None,
     verbose: bool = True
 ) -> dict:
     """
@@ -39,7 +39,6 @@ def convert_local_html_to_markdown(
     
     Args:
         input_dir: Path to the directory containing HTML files
-        output_dir: Path to save the markdown files (default: "markdown_output")
         exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
         verbose: Whether to print progress messages
     
@@ -59,9 +58,11 @@ def convert_local_html_to_markdown(
         >>> print(f"Processed {result['processed']} files")
     """
     # Validate input directory
-    input_path = Path(input_dir)
+    input_path = Path(input_dir) / "ig" / "site"
     if not input_path.exists():
         raise FileNotFoundError(f"Input directory not found: {input_dir}")
+
+    output_path = Path(input_dir) / "ig" / "converted_markdown"
     
     # Create output directory
     # TODO: address this
@@ -253,42 +254,43 @@ def _update_header_numbering(header_list: list, current_level: int, prev_level: 
             header_list.append(1)
     return header_list
 
+# Does not appear to be used
+#
+# def get_html_file_count(input_dir: str, exclude_patterns: list = None) -> int:
+#     """
+#     Count HTML files that would be processed (excluding those matching patterns).
 
-def get_html_file_count(input_dir: str, exclude_patterns: list = None) -> int:
-    """
-    Count HTML files that would be processed (excluding those matching patterns).
-    
-    This function provides a way to preview how many files would be processed
-    without actually performing the conversion.
-    
-    Args:
-        input_dir: Path to the directory containing HTML files
-        exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
-    
-    Returns:
-        Number of HTML files that would be processed
-        
-    Raises:
-        FileNotFoundError: If input directory doesn't exist
-        
-    Example:
-        >>> count = get_html_file_count('input/html')
-        >>> print(f"Will process {count} HTML files")
-    """
-    input_path = Path(input_dir)
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input directory not found: {input_dir}")
-    
-    if exclude_patterns is None:
-        exclude_patterns = DEFAULT_EXCLUDE_PATTERNS
-    
-    compiled_patterns = [re.compile(pattern) for pattern in exclude_patterns]
-    
-    count = 0
-    for file in input_path.glob('**/*.html'):
-        file_str = str(file)
-        exclude = any(pattern.search(file_str) for pattern in compiled_patterns)
-        if not exclude:
-            count += 1
-    
-    return count
+#     This function provides a way to preview how many files would be processed
+#     without actually performing the conversion.
+
+#     Args:
+#         input_dir: Path to the directory containing HTML files
+#         exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
+
+#     Returns:
+#         Number of HTML files that would be processed
+
+#     Raises:
+#         FileNotFoundError: If input directory doesn't exist
+
+#     Example:
+#         >>> count = get_html_file_count('input/html')
+#         >>> print(f"Will process {count} HTML files")
+#     """
+#     input_path = Path(input_dir)
+#     if not input_path.exists():
+#         raise FileNotFoundError(f"Input directory not found: {input_dir}")
+
+#     if exclude_patterns is None:
+#         exclude_patterns = DEFAULT_EXCLUDE_PATTERNS
+
+#     compiled_patterns = [re.compile(pattern) for pattern in exclude_patterns]
+
+#     count = 0
+#     for file in input_path.glob('**/*.html'):
+#         file_str = str(file)
+#         exclude = any(pattern.search(file_str) for pattern in compiled_patterns)
+#         if not exclude:
+#             count += 1
+
+#     return count
