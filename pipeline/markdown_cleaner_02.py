@@ -8,6 +8,7 @@ navigation elements, and fixing formatting issues from HTML-to-markdown conversi
 import os
 import re
 from pathlib import Path
+import path_helpers
 from typing import Optional
 
 
@@ -150,8 +151,7 @@ def process_directory(artifacts_dir: str = str(path_helpers.demo_artifacts_path(
     
     Args:
         artifacts_dir: Path to base artifacts directory
-        output_dir: Directory to save cleaned files
-        
+
     Returns:
         Dictionary containing processing summary:
             - total_files: Total markdown files found
@@ -174,7 +174,7 @@ def process_directory(artifacts_dir: str = str(path_helpers.demo_artifacts_path(
         raise FileNotFoundError(f"Markdown files in artifacts directory not found: {input_path}")
     
     # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
     
     # Get all markdown files in the input directory
     md_files = list(input_path.glob('*.md'))

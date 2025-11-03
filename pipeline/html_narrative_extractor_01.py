@@ -62,10 +62,8 @@ def convert_local_html_to_markdown(
     if not input_path.exists():
         raise FileNotFoundError(f"IG files in artifacts directory not found: {input_path}")
 
-    output_path = Path(artifacts_dir) / "ig" / "converted_markdown"
-    
-    # Create output directory
-    # TODO: address this
+    output_dir= Path(artifacts_dir) / "ig" / "converted_markdown"
+
     os.makedirs(output_dir, exist_ok=True)
     
     # Use default patterns if none provided
