@@ -39,10 +39,7 @@ from collections import defaultdict
 import prompt_utils
 
 # Constants
-CURRENT_DIR = Path.cwd()
-# TODO: handle this
-OUTPUT_DIR = os.path.join(CURRENT_DIR, 'test_output')
-TEST_GEN_PATH = path_helpers.project_root() / "prompts" / "test_gen.md"
+TEST_GEN_PATH = Path(__file__).parent.parent / "prompts" / "test_gen.md"
 
 # System prompts for test generation
 INFERNO_TEST_SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
@@ -228,7 +225,7 @@ def get_dsl_guidance() -> str:
     Returns:
         String containing Inferno DSL guidance for test development
     """
-    guidance_path = path_helpers.project_root() / "pipeline" / "dsl-guidance.md"
+    guidance_path = Path(__file__).parent.parent / "pipeline" / "dsl-guidance.md"
     
     with open(guidance_path, 'r', encoding='utf-8') as f:
         return f.read()
@@ -998,8 +995,8 @@ def llm_validate_and_fix_alignment(client_instance, api_type: str, output_dir: s
         }
 
 
-def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: str, ig_name: str = "US Core",
-                             output_dir: str = OUTPUT_DIR, expected_actors: List[str] = None,
+def generate_inferno_test_kit(client_instance, api_type: str, artifacts_dir: str, ig_name: str = "US Core",
+                             expected_actors: List[str] = None,
                              enable_validation: bool = True) -> Dict[str, Any]:
     """
     Process a test plan and generate an Inferno test kit.
@@ -1009,9 +1006,8 @@ def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: st
     Args:
         client_instance: LLM client instance
         api_type: API type (claude, gemini, gpt)
-        test_plan_file: Path to test plan markdown file
+        artifacts_dir: Path to base artifacts directory
         ig_name: Name of the module for the tests
-        output_dir: Directory for output files
         expected_actors: List of expected actors in the test plan
         enable_validation: Whether to enable optional LLM validation of generated tests
         
@@ -1028,6 +1024,9 @@ def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: st
     Raises:
         Exception: For various processing errors
     """
+    test_plan_file = os.path.join(artifacts_dir, "test_plan", "test_plan.md")
+    output_dir = os.path.join(artifacts_dir, "tests")
+
     print(f"\n{'='*80}")
     print("INFERNO TEST KIT GENERATION")
     print(f"{'='*80}")

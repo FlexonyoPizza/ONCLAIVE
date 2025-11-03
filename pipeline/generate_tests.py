@@ -12,8 +12,7 @@ base_artifacts_path = "../artifacts-demo"
 test_kit_07.generate_inferno_test_kit(
     client_instance=llm_clients,
     api_type='claude',
-    test_plan_file=os.path.join(working_directory, base_artifacts_path, "test_plan", "test_plan.md"),
+    artifacts_dir=os.path.join(working_directory, base_artifacts_path),
     ig_name='US Core',
-    output_dir=os.path.join(working_directory, base_artifacts_path, "tests"),
     enable_validation=False
 )
