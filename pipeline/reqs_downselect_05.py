@@ -404,7 +404,7 @@ def full_pass(artifacts_dir: str, rag_files: List[str] = None,
     # Validate inputs
     if rag_files is None:
         rag_files = []
-    input_dir = os.path.join(base_artifacts_dir, "requirements", "revised")
+    input_dir = os.path.join(artifacts_dir, "requirements", "revised")
     md_files = get_md_files_from_directory(input_dir)
     output_dir = os.path.join(artifacts_dir, "requirements", "final")
 

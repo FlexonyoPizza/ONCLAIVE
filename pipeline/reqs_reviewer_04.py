@@ -55,7 +55,7 @@ def setup_environment() -> Dict[str, Any]:
         sys.path.insert(0, str(path_helpers.project_root()))
     
     # Import LLM utils with better error handling
-    llm_utils_path = path_helpers.project_root() / 'pipeline' / 'llm_utils.py'
+    llm_utils_path = Path(__file__).parent.parent / 'pipeline' / 'llm_utils.py'
     if not llm_utils_path.exists():
         raise FileNotFoundError(f"llm_utils.py not found at {llm_utils_path}")
     
@@ -64,7 +64,7 @@ def setup_environment() -> Dict[str, Any]:
     spec.loader.exec_module(llm_utils)
     
     # Import prompt utilities with better error handling
-    prompt_utils_path = path_helpers.project_root() / 'pipeline' / 'prompt_utils.py'
+    prompt_utils_path = Path(__file__).parent.parent / 'pipeline' / 'prompt_utils.py'
     if not prompt_utils_path.exists():
         raise FileNotFoundError(f"prompt_utils.py not found at {prompt_utils_path}")
     
@@ -898,7 +898,7 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
     }
 
 
-def run_batch_requirements_refinement(artifacts_dfir: str, client_instance,
+def run_batch_requirements_refinement(artifacts_dir: str, client_instance,
                                      output_dir: str = "checkpoints/revised_reqs_extraction",
                                      batch_size: int = 100, api_type: str = "claude",
                                      ) -> Dict[str, Any]:
@@ -923,11 +923,11 @@ def run_batch_requirements_refinement(artifacts_dfir: str, client_instance,
         ... )
     """
     input_file = os.path.join(artifacts_dir, "requirements", "initial_extraction", "reqs_list_v1.md")
-    output_dir = os.path.join(working_directory, base_artifacts_dir, "requirements", "revised")
+    output_dir = os.path.join(artifacts_dir, "requirements", "revised")
     return batch_process_requirements(
         input_file=input_file,
         output_dir=output_dir,
         client_instance=client_instance,
         batch_size=batch_size,
-        api_type=api_type,
+        api_type=api_type
     )

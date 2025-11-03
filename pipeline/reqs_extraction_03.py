@@ -28,7 +28,7 @@ SYSTEM_PROMPTS = {
 }
 
 # Basic setup
-load_dotenv(os.path.join(path_helpers.project_root(), '.env'))
+load_dotenv(Path(__file__).parent.parent / '.env')
 
 # Setup the prompt environment
 prompt_env = prompt_utils.setup_prompt_environment()

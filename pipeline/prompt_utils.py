@@ -43,7 +43,7 @@ def setup_prompt_environment() -> Dict[str, Any]:
         dict: Dictionary containing prompt-related paths
     """
     # Define prompt directory
-    prompt_dir = os.path.join(path_helpers.project_root(), 'prompts')
+    prompt_dir = Path(__file__).parent.parent / 'prompts'
     
     # Create prompt directory if it doesn't exist
     os.makedirs(prompt_dir, exist_ok=True)
