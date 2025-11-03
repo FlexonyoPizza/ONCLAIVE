@@ -22,11 +22,6 @@ reqs_reviewer_04.run_batch_requirements_refinement(
     api_type="claude"
 )
 
-md_files_list = reqs_downselect_05.get_md_files_from_directory(
-    os.path.join(working_directory, base_artifacts_path, "requirements", "revised")
-)
-
 reqs_downselect_05.full_pass(
-    md_files=md_files_list,
-    output_dir=os.path.join(working_directory, base_artifacts_path, "requirements", "final")
+    artifacts_dir=os.path.join(working_directory, base_artifacts_path)
 )
