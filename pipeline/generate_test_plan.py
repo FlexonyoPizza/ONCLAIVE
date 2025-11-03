@@ -21,9 +21,8 @@ test_plan_06.clear_capability_collection("capability_statements")
 test_plan_06.generate_consolidated_test_plan(
     client_instance=llm_clients,
     api_type='claude',
-    requirements_file=os.path.join(working_directory, base_artifacts_path, "requirements", "final", "consolidated_reqs.md"),
-    capability_statement_file=os.path.join(working_directory, base_artifacts_path, "ig", "cleaned_markdown", "CapabilityStatement-us-core-server.md"),
+    artifacts_dir=os.path.join(working_directory, base_artifacts_path),
+    # capability_statement_file=os.path.join(working_directory, base_artifacts_path, "ig", "cleaned_markdown", "CapabilityStatement-us-core-server.md"),
     ig_name="US Core IG",
-    output_dir=os.path.join(working_directory, base_artifacts_path, "test_plan"),
     verbose=True
 )

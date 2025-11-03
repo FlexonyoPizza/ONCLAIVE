@@ -27,6 +27,7 @@ import re
 import logging
 import time
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
@@ -39,8 +40,6 @@ import llm_utils
 import prompt_utils
 
 # Constants
-# TODO: remove
-CURRENT_DIR = Path.cwd()
 
 # System prompt for test plan generation
 SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
@@ -417,10 +416,9 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
     
     return result
 
-
-def generate_consolidated_test_plan(client_instance, api_type: str, requirements_file: str,
-                                   capability_statement_file: str, ig_name: str = "FHIR Implementation Guide",
-                                   output_dir: str = None, verbose: bool = True) -> Dict[str, Any]:
+def generate_consolidated_test_plan(client_instance, api_type: str, artifacts_dir: str,
+                                   capability_statement_file: str = None, ig_name: str = "FHIR Implementation Guide",
+                                   verbose: bool = True) -> Dict[str, Any]:
     """
     Process requirements and generate a consolidated test plan using ChromaDB RAG.
     
@@ -434,10 +432,9 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
     Args:
         client_instance: LLM client instance
         api_type: Type of API to use ('claude', 'gemini', 'gpt')
-        requirements_file: Path to requirements file (.md or .json)
+        artifacts_dir: Path to base artifacts directory
         capability_statement_file: Path to capability statement file
         ig_name: Name of the implementation guide
-        output_dir: Output directory (uses default if None)
         verbose: Whether to show detailed progress information
         
     Returns:
@@ -449,13 +446,18 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
     Raises:
         Exception: For various processing errors
     """
-    # Set up output directory
-    # TODO: address this
-    if output_dir is None:
-        output_dir = Path(CURRENT_DIR, 'test_plan_output')
-    else:
-        output_dir = Path(output_dir)
-    
+    requirements_file = os.path.join(artifacts_dir, "requirements", "final", "consolidated_reqs.md")
+    output_dir = Path(os.path.join(artifacts_dir, "test_plan"))
+    markdown_dir = os.path.join(artifacts_dir, "ig", "cleaned_markdown")
+    capability_statement_files = [f for f in os.listdir(markdown_dir) if re.match(r'.*[cC]apability[Ss]tatement.*\.md', f)]
+    # TODO: handle these better
+    if len(capability_statement_files) < 1:
+      print("No CapabilityStatement markdown file found.")
+      raise
+    elif len(capability_statement_files) > 1:
+      print("Multiple CapabilityStatement markdown files found.")
+      raise
+    capability_statement_file = os.path.join(artifacts_dir, "ig", "cleaned_markdown", capability_statement_files[0])
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
@@ -504,7 +506,6 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
             print(f"  • {group}: {len(reqs)} requirements")
         
         # Generate test plan file
-        #test_plan_path = output_dir / f"{api_type}_test_plan_{timestamp}.md"
         test_plan_path = output_dir / "test_plan.md"
         
         print(f"\nGenerating test specifications...")
