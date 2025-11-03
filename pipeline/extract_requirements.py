@@ -16,8 +16,7 @@ reqs_extraction_03.run_requirements_extractor(
     client_instance=llm_clients)
 
 reqs_reviewer_04.run_batch_requirements_refinement(
-    input_file=os.path.join(working_directory, base_artifacts_path, "requirements", "initial_extraction", "reqs_list_v1.md"),
-    output_dir=os.path.join(working_directory, base_artifacts_path, "requirements", "revised"),
+    artifacts_dir=os.path.join(working_directory, base_artifacts_path),
     client_instance=llm_clients,
     batch_size=25,
     api_type="claude"

@@ -16,7 +16,7 @@ Usage:
     from reqs_reviewer import refine_requirements, run_interactive_refinement
     
     # Direct usage
-    result = refine_requirements("input_file.md", "claude", "output_dir")
+    result = refine_requirements("../us-core", "claude", "output_dir")
 """
 
 import os
@@ -898,7 +898,7 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
     }
 
 
-def run_batch_requirements_refinement(input_file: str, client_instance, 
+def run_batch_requirements_refinement(artifacts_dfir: str, client_instance,
                                      output_dir: str = "checkpoints/revised_reqs_extraction",
                                      batch_size: int = 100, api_type: str = "claude",
                                      ) -> Dict[str, Any]:
@@ -906,9 +906,8 @@ def run_batch_requirements_refinement(input_file: str, client_instance,
     Convenience function to run batch processing with existing setup.
     
     Args:
-        input_file: Path to input requirements file
-        client_instance: Your LLM client instance  
-        output_dir: Output directory (default: "checkpoints/revised_reqs_extraction")
+        artifacts_dir: Path to base artifacts directory
+        client_instance: Your LLM client instance
         batch_size: Requirements per batch (default: 100)
         api_type: API to use (default: "claude")
 
@@ -917,12 +916,14 @@ def run_batch_requirements_refinement(input_file: str, client_instance,
         
     Usage:
         >>> result = run_batch_requirements_refinement(
-        ...     input_file="path/to/your/requirements.md",
+        ...     artifacts_dir="../us-core",
         ...     client_instance=llm_clients,
         ...     batch_size=50,
         ...     api_type="gpt"
         ... )
     """
+    input_file = os.path.join(artifacts_dir, "requirements", "initial_extraction", "reqs_list_v1.md")
+    output_dir = os.path.join(working_directory, base_artifacts_dir, "requirements", "revised")
     return batch_process_requirements(
         input_file=input_file,
         output_dir=output_dir,
