@@ -26,7 +26,7 @@ DEFAULT_EXCLUDE_PATTERNS = [
 
 
 def convert_local_html_to_markdown(
-    input_dir: str = str(path_helpers.demo_artifacts_path()),
+    artifacts_dir: str = str(path_helpers.demo_artifacts_path()),
     exclude_patterns: list = None,
     verbose: bool = True
 ) -> dict:
@@ -38,7 +38,7 @@ def convert_local_html_to_markdown(
     while preserving the directory structure.
     
     Args:
-        input_dir: Path to the directory containing HTML files
+        artifacts_dir: Path to the base artifacts directory
         exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
         verbose: Whether to print progress messages
     
@@ -58,11 +58,11 @@ def convert_local_html_to_markdown(
         >>> print(f"Processed {result['processed']} files")
     """
     # Validate input directory
-    input_path = Path(input_dir) / "ig" / "site"
+    input_path = Path(artifacts_dir) / "ig" / "site"
     if not input_path.exists():
-        raise FileNotFoundError(f"Input directory not found: {input_dir}")
+        raise FileNotFoundError(f"IG files in artifacts directory not found: {input_path}")
 
-    output_path = Path(input_dir) / "ig" / "converted_markdown"
+    output_path = Path(artifacts_dir) / "ig" / "converted_markdown"
     
     # Create output directory
     # TODO: address this

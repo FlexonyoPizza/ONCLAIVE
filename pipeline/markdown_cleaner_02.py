@@ -141,7 +141,7 @@ def _apply_final_cleanup(content: str) -> str:
     return content
 
 
-def process_directory(input_dir: str = str(path_helpers.demo_artifacts_path())) -> dict:
+def process_directory(artifacts_dir: str = str(path_helpers.demo_artifacts_path())) -> dict:
     """
     Process all markdown files in a directory and save cleaned versions.
     
@@ -149,7 +149,7 @@ def process_directory(input_dir: str = str(path_helpers.demo_artifacts_path())) 
     clean_markdown_file(), and saves the results to the output directory.
     
     Args:
-        input_dir: Directory containing markdown files to process
+        artifacts_dir: Path to base artifacts directory
         output_dir: Directory to save cleaned files
         
     Returns:
@@ -167,11 +167,11 @@ def process_directory(input_dir: str = str(path_helpers.demo_artifacts_path())) 
         >>> result = process_directory('input_md', 'cleaned_md')
         >>> print(f"Processed {result['successful']}/{result['total_files']} files")
     """
-    input_path = Path(input_dir) / "ig" / "converted_markdown"
-    output_path = Path(input_dir) / "ig" / "cleaned_markdown"
+    input_path = Path(artifacts_dir) / "ig" / "converted_markdown"
+    output_path = Path(artifacts_dir) / "ig" / "cleaned_markdown"
 
     if not input_path.exists():
-        raise FileNotFoundError(f"Input directory not found: {input_dir}")
+        raise FileNotFoundError(f"Markdown files in artifacts directory not found: {input_path}")
     
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
@@ -179,7 +179,7 @@ def process_directory(input_dir: str = str(path_helpers.demo_artifacts_path())) 
     # Get all markdown files in the input directory
     md_files = list(input_path.glob('*.md'))
     
-    print(f"Found {len(md_files)} markdown files in {input_dir}")
+    print(f"Found {len(md_files)} markdown files in {input_path}")
     
     successful = 0
     failed = 0
