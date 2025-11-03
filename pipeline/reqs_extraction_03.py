@@ -459,9 +459,8 @@ def process_markdown_content_for_incose_srs(
 
 
 def run_requirements_extractor(
-    markdown_dir: str, 
-    output_dir: str, 
-    api_type: str, 
+    artifacts_dir: str,
+    api_type: str,
     client_instance, 
     max_files: int = None
 ) -> None:
@@ -472,8 +471,7 @@ def run_requirements_extractor(
     markdown files and generating INCOSE-formatted requirements documents.
     
     Args:
-        markdown_dir: Path to directory containing markdown files to process
-        output_dir: Path to directory where output files should be saved
+        artifacts_dir: Path to base artifacts directory
         api_type: Type of LLM API to use ('claude', 'gemini', 'gpt', 'aip')
         client_instance: LLM client manager object with configured API clients
         max_files: Maximum number of files to process (optional, processes all if None)
@@ -484,13 +482,16 @@ def run_requirements_extractor(
         
     Example:
         >>> run_requirements_extractor(
-        ...     'input/markdown_files',
+        ...     '../us-core',
         ...     'output/requirements', 
         ...     'claude',
         ...     llm_clients,
         ...     max_files=10
         ... )
     """
+    markdown_dir = os.path.join(artifacts_dir, "ig", "cleaned_markdown")
+    output_dir = os.path.join(artifacts_dir, "requirements", "initial_extraction")
+
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
