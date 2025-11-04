@@ -38,9 +38,6 @@ from collections import defaultdict
 
 import prompt_utils
 
-# Constants
-TEST_GEN_PATH = path_helpers.PROJECT_ROOT / "prompts" / "test_gen.md"
-
 # System prompts for test generation
 INFERNO_TEST_SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
 Your task is to convert test specifications from a test plan into executable Ruby tests using the Inferno testing framework.
@@ -343,8 +340,10 @@ def validate_test_with_llm(client_instance, api_type: str, test_code: str, dsl_g
     return corrected_code
 
 
-def generate_tests_for_section(client_instance, api_type: str, section: Dict[str, Any], dsl_guidance: str,
-                              ig_name: str, max_input_token_limit: int = 16000, enable_validation: bool = True) -> Dict[str, str]:
+def generate_tests_for_section(client_instance, api_type: str, section: Dict[str, Any],
+                               dsl_guidance: str, ig_name: str, artifacts_dir: str,
+                               max_input_token_limit: int = 16000,
+                               enable_validation: bool = True) -> Dict[str, str]:
     """
     Generate tests for an entire section or individual requirements.
     
@@ -354,6 +353,7 @@ def generate_tests_for_section(client_instance, api_type: str, section: Dict[str
         section: Section dictionary containing requirements
         dsl_guidance: Inferno test development guidance
         ig_name: Name of the module for the test
+        artifacts_dir: Path to base artifacts directory
         max_input_token_limit: Maximum tokens for the model
         enable_validation: Whether to perform LLM validation of generated tests
         
@@ -439,7 +439,8 @@ def generate_tests_for_section(client_instance, api_type: str, section: Dict[str
             
             # Prepare the prompt for this requirement with full context
             req_prompt = prompt_utils.load_prompt(
-                str(TEST_GEN_PATH),
+                artifacts_dir,
+                'test_gen.md',
                 test_specification=requirement['full_content'],
                 requirement_id=requirement['id'],
                 ig_name=ig_name,
@@ -1095,7 +1096,8 @@ def generate_inferno_test_kit(client_instance, api_type: str,
                 api_type, 
                 section, 
                 dsl_guidance,
-                ig_name_camel, 
+                ig_name_camel,
+                artifacts_dir,
                 70000,  # Higher token limit
                 enable_validation
             )
