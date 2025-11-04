@@ -463,7 +463,7 @@ def process_markdown_content_for_incose_srs(
 def run_requirements_extractor(
     api_type: str,
     client_instance,
-    artifacts_dir: str = str(path_helpers.PROJECT_ROOT),
+    artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
     max_files: int = None
 ) -> None:
     """
