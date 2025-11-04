@@ -46,12 +46,6 @@ import prompt_utils
 SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
 Your task is to analyze FHIR Implementation Guide requirements and generate practical, implementable test specifications."""
 
-# Setup the prompt environment
-prompt_env = prompt_utils.setup_prompt_environment()
-PROMPT_DIR = prompt_env["prompt_dir"]
-TEST_PLAN_PATH = prompt_env["test_plan_gen_path"]
-REQUIREMENT_GROUPING_PATH = prompt_env["requirement_grouping_path"]
-
 # Setup logging
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -212,36 +206,40 @@ def retrieve_relevant_capability_info(requirement: Dict[str, str], collection, n
     return capability_info
 
 
-def get_test_plan_prompt(requirement: str, capability_info: str) -> str:
+def get_test_plan_prompt(requirement: str, capability_info: str, artifacts_dir: str) -> str:
     """
     Load the test plan prompt from file and format it with requirement and capability info.
     
     Args:
         requirement: Formatted requirement string
         capability_info: Retrieved capability information
+        artifacts_dir: Path to base artifacts directory
         
     Returns:
         Formatted prompt for test plan generation
     """
     return prompt_utils.load_prompt(
-        TEST_PLAN_PATH,
+        artifacts_dir,
+        'test_plan.md',
         requirement=requirement,
         capability_info=capability_info
     )
 
 
-def get_requirement_grouping_prompt(requirement: str) -> str:
+def get_requirement_grouping_prompt(requirement: str, artifacts_dir: str) -> str:
     """
     Load the requirement grouping prompt from file and format it with requirement info.
     
     Args:
         requirement: Formatted requirement string
+        artifacts_dir: Path to base artifacts directory
         
     Returns:
         Formatted prompt for requirement grouping
     """
     return prompt_utils.load_prompt(
-        REQUIREMENT_GROUPING_PATH,
+        artifacts_dir,
+        'reqs_grouping.md',
         requirement=requirement
     )
 
@@ -342,7 +340,7 @@ def load_requirements(req_file: str) -> List[Dict[str, Any]]:
         raise ValueError(f"Unsupported file format: {req_file}. Must be .json or .md")
 
 
-def identify_requirement_group(client_instance, api_type: str, req: Dict[str, Any]) -> str:
+def identify_requirement_group(client_instance, api_type: str, req: Dict[str, Any], artifacts_dir: str) -> str:
     """
     Identify the appropriate group for a requirement using LLM analysis.
     
@@ -350,6 +348,7 @@ def identify_requirement_group(client_instance, api_type: str, req: Dict[str, An
         client_instance: LLM client instance
         api_type: Type of API to use ('claude', 'gemini', 'gpt')
         req: Requirement dictionary
+        artifacts_dir: Path to base artifacts directory
         
     Returns:
         Group name for the requirement
@@ -362,7 +361,7 @@ def identify_requirement_group(client_instance, api_type: str, req: Dict[str, An
     formatted_req = format_requirement_for_prompt(requirement)
     
     # Retrieve prompt with the requirement using external file
-    prompt = get_requirement_grouping_prompt(formatted_req)
+    prompt = get_requirement_grouping_prompt(formatted_req, artifacts_dir)
     
     # Make the API request with simplified system prompt
     group_system_prompt = "You are a FHIR expert who categorizes requirements by their functional or resource type."
@@ -375,8 +374,9 @@ def identify_requirement_group(client_instance, api_type: str, req: Dict[str, An
     return group_name
 
 
-def generate_test_specification_with_capability(api_type: str, client_instance, requirement: Dict[str, str],
-                                               capability_collection, verbose: bool = False) -> str:
+def generate_test_specification_with_capability(api_type: str, client_instance,
+                                                requirement: Dict[str, str], capability_collection,
+                                                artifacts_dir: str, verbose: bool = False) -> str:
     """
     Generate a comprehensive test specification using capability info from ChromaDB.
     
@@ -385,6 +385,7 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
         client_instance: LLM client instance
         requirement: Requirement dictionary
         capability_collection: ChromaDB collection for capability statements
+        artifacts_dir: Path to base artifacts directory
         verbose: Whether to print detailed processing information
         
     Returns:
@@ -404,7 +405,7 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
     capability_info = retrieve_relevant_capability_info(req_parsed, capability_collection, verbose=verbose)
 
     # Create prompt with the requirement and capability information
-    prompt = get_test_plan_prompt(formatted_req, capability_info)
+    prompt = get_test_plan_prompt(formatted_req, capability_info, artifacts_dir)
     
     if verbose:
         print(f"Sending request to {api_type.upper()} API...")
@@ -491,7 +492,7 @@ def generate_consolidated_test_plan(client_instance, api_type: str,
         for i, req in enumerate(requirements, 1):
             req_id = req.get('id', 'UNKNOWN-ID')
             print(f"  Analyzing requirement {i}/{len(requirements)}: {req_id}", end='\r')
-            req_groups[req_id] = identify_requirement_group(client_instance, api_type, req)
+            req_groups[req_id] = identify_requirement_group(client_instance, api_type, req, artifacts_dir)
         
         print(f"  Completed grouping {len(requirements)} requirements                    ")
         
@@ -548,7 +549,7 @@ def generate_consolidated_test_plan(client_instance, api_type: str,
                 print(f"  [{processed_count}/{total_reqs}] {req_id}", end='\r')
                 
                 test_spec = generate_test_specification_with_capability(
-                    api_type, client_instance, req, capability_collection, verbose=verbose
+                    api_type, client_instance, req, capability_collection, artifacts_dir, verbose=verbose
                 )
                 
                 # Add to test plan content with proper anchor for TOC linking

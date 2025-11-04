@@ -22,6 +22,7 @@ def load_prompt(artifacts_dir: str, filename: str, **kwargs) -> str:
     if not prompt_path.is_file():
         prompt_path = Path(path_helpers.PROJECT_ROOT) / 'default_prompts' / filename
 
+    logging.info(f"Using prompt at: {prompt_path}")
     try:
         with open(prompt_path, 'r') as f:
             prompt_template = f.read()
