@@ -27,13 +27,10 @@ SYSTEM_PROMPTS = {
     Implementation Guide content to extract specific testable requirements in INCOSE-compliant format."""
 }
 
+PROMPT_FILENAME = 'reqs_extraction.md'
+
 # Basic setup
 load_dotenv(path_helpers.PROJECT_ROOT / '.env')
-
-# Setup the prompt environment
-prompt_env = prompt_utils.setup_prompt_environment()
-PROMPT_DIR = prompt_env["prompt_dir"]
-REQUIREMENTS_EXTRACTION_PATH = prompt_env["requirements_extraction_path"]
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -219,7 +216,8 @@ def should_combine_files(config: Dict, files: List[str], markdown_dir: str, api_
     return combined_files
 
 
-def create_incose_requirements_extraction_prompt(content: str, chunk_index: int, total_chunks: int) -> str:
+def create_incose_requirements_extraction_prompt(content: str, chunk_index: int,
+                                                 total_chunks: int, artifacts_dir: str) -> str:
     """
     Create a prompt for extracting requirements in INCOSE format using external prompt file.
     
@@ -231,8 +229,10 @@ def create_incose_requirements_extraction_prompt(content: str, chunk_index: int,
     Returns:
         The formatted prompt for the LLM
     """
+
     prompt = prompt_utils.load_prompt(
-        REQUIREMENTS_EXTRACTION_PATH,
+        artifacts_dir,
+        PROMPT_FILENAME,
         FHIR_TEXT=content,
         chunk_index=chunk_index,
         total_chunks=total_chunks
@@ -241,7 +241,8 @@ def create_incose_requirements_extraction_prompt(content: str, chunk_index: int,
     return prompt
 
 
-def format_content_for_api(content: str, api_type: str, chunk_index: int, total_chunks: int) -> Union[str, List[dict], dict]:
+def format_content_for_api(content: str, api_type: str, chunk_index: int,
+                           total_chunks: int, artifacts_dir: str) -> Union[str, List[dict], dict]:
     """
     Format content appropriately for each API's expected input format.
     
@@ -254,7 +255,7 @@ def format_content_for_api(content: str, api_type: str, chunk_index: int, total_
     Returns:
         Formatted content ready for API consumption
     """
-    base_prompt = create_incose_requirements_extraction_prompt(content, chunk_index, total_chunks)
+    base_prompt = create_incose_requirements_extraction_prompt(content, chunk_index, total_chunks, artifacts_dir)
     
     if api_type == "claude":
         return [{
@@ -272,9 +273,9 @@ def format_content_for_api(content: str, api_type: str, chunk_index: int, total_
 
 def process_markdown_content_for_incose_srs(
     client_instance, 
-    api_type: str, 
-    markdown_dir: str, 
-    output_dir: str = None, 
+    api_type: str,
+    artifacts_dir: str,
+    output_dir: str = None,
     max_files: int = None
 ) -> Dict[str, Any]:
     """
@@ -283,7 +284,7 @@ def process_markdown_content_for_incose_srs(
     Args:
         client_instance: LLM client manager object
         api_type: The API to use for processing ('claude', 'gemini', 'gpt', 'aip')
-        markdown_dir: Directory containing markdown files
+        artifacts_dir: Path to base artifacts directory
         output_directory: Directory to save output files (optional, uses default if None)
         max_files: Maximum number of files to process (optional, processes all if None)
         
@@ -297,6 +298,7 @@ def process_markdown_content_for_incose_srs(
         FileNotFoundError: If markdown directory doesn't exist
         Exception: For various processing errors
     """
+    markdown_dir = os.path.join(artifacts_dir, "ig", "cleaned_markdown")
     logging.info(f"Starting processing with {api_type} on directory: {markdown_dir}")
     config = client_instance.config[api_type]
     
@@ -338,7 +340,7 @@ def process_markdown_content_for_incose_srs(
                     print(f"    Processing chunk {chunk_idx}/{len(chunks)}", end='\r')
                     logging.info(f"Processing chunk {chunk_idx}/{len(chunks)} of {group[0]}")
                     
-                    formatted_content = format_content_for_api(chunk, api_type, chunk_idx, len(chunks))
+                    formatted_content = format_content_for_api(chunk, api_type, chunk_idx, len(chunks), artifacts_dir)
                     
                     # Extract proper text based on API type
                     if api_type == "claude":
@@ -483,19 +485,18 @@ def run_requirements_extractor(
     Example:
         >>> run_requirements_extractor(
         ...     '../us-core',
-        ...     'output/requirements', 
         ...     'claude',
         ...     llm_clients,
         ...     max_files=10
         ... )
     """
-    markdown_dir = os.path.join(artifacts_dir, "ig", "cleaned_markdown")
     output_dir = os.path.join(artifacts_dir, "requirements", "initial_extraction")
 
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
     # Verify the markdown directory exists
+    markdown_dir = os.path.join(artifacts_dir, "ig", "cleaned_markdown")
     if not os.path.exists(markdown_dir):
         raise FileNotFoundError(f"Markdown directory not found at {markdown_dir}")
     
@@ -513,8 +514,8 @@ def run_requirements_extractor(
     # Process the markdown files and generate direct INCOSE SRS document
     api_results = process_markdown_content_for_incose_srs(
         client_instance=client_instance,
-        api_type=api_type, 
-        markdown_dir=markdown_dir,
+        api_type=api_type,
+        artifacts_dir=artifacts_dir,
         output_dir=output_dir,
         max_files=max_files
     )
