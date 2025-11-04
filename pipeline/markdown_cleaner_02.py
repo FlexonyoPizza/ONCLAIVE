@@ -142,7 +142,7 @@ def _apply_final_cleanup(content: str) -> str:
     return content
 
 
-def process_directory(artifacts_dir: str = str(path_helpers.demo_artifacts_path())) -> dict:
+def process_directory(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT)) -> dict:
     """
     Process all markdown files in a directory and save cleaned versions.
     

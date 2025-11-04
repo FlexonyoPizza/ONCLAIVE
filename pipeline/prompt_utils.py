@@ -43,7 +43,7 @@ def setup_prompt_environment() -> Dict[str, Any]:
         dict: Dictionary containing prompt-related paths
     """
     # Define prompt directory
-    prompt_dir = Path(__file__).parent.parent / 'prompts'
+    prompt_dir = path_helpers.PROJECT_ROOT / 'prompts'
     
     # Create prompt directory if it doesn't exist
     os.makedirs(prompt_dir, exist_ok=True)
@@ -53,7 +53,7 @@ def setup_prompt_environment() -> Dict[str, Any]:
         "prompt_dir": prompt_dir,
         "requirements_extraction_path": os.path.join(prompt_dir, 'reqs_extraction_claude.md'),
         "requirements_refinement_path": os.path.join(prompt_dir, 'requirements_refinement.md'),
-        "requirement_grouping_path": os.path.join(prompt_dir, 'requirement_grouping.md'),
+        "requirement_grouping_path": os.path.join(prompt_dir, 'requirement_grouping_uscore.md'),
         "test_plan_gen_path": os.path.join(prompt_dir, 'test_plan.md'),
         "test_gen_path": os.path.join(prompt_dir, 'test_gen.md')
     }

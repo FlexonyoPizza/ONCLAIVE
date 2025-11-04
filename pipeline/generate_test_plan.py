@@ -22,7 +22,6 @@ test_plan_06.generate_consolidated_test_plan(
     client_instance=llm_clients,
     api_type='claude',
     artifacts_dir=os.path.join(working_directory, base_artifacts_path),
-    # capability_statement_file=os.path.join(working_directory, base_artifacts_path, "ig", "cleaned_markdown", "CapabilityStatement-us-core-server.md"),
     ig_name="US Core IG",
     verbose=True
 )

@@ -28,7 +28,7 @@ SYSTEM_PROMPTS = {
 }
 
 # Basic setup
-load_dotenv(Path(__file__).parent.parent / '.env')
+load_dotenv(path_helpers.PROJECT_ROOT / '.env')
 
 # Setup the prompt environment
 prompt_env = prompt_utils.setup_prompt_environment()
@@ -302,7 +302,7 @@ def process_markdown_content_for_incose_srs(
     
     # Use default output directory if none provided
     if output_dir is None:
-        output_dir = os.path.join(path_helpers.project_root(), 'reqs_extraction', 'initial_reqs_output')
+        output_dir = path_helpers.PROJECT_ROOT / 'reqs_extraction' / 'initial_reqs_output'
     
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
@@ -459,9 +459,9 @@ def process_markdown_content_for_incose_srs(
 
 
 def run_requirements_extractor(
-    artifacts_dir: str,
     api_type: str,
-    client_instance, 
+    client_instance,
+    artifacts_dir: str = str(path_helpers.PROJECT_ROOT),
     max_files: int = None
 ) -> None:
     """

@@ -26,7 +26,7 @@ DEFAULT_EXCLUDE_PATTERNS = [
 
 
 def convert_local_html_to_markdown(
-    artifacts_dir: str = str(path_helpers.demo_artifacts_path()),
+    artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
     exclude_patterns: list = None,
     verbose: bool = True
 ) -> dict:

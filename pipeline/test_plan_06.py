@@ -28,6 +28,7 @@ import logging
 import time
 import json
 import os
+import path_helpers
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
@@ -416,9 +417,10 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
     
     return result
 
-def generate_consolidated_test_plan(client_instance, api_type: str, artifacts_dir: str,
-                                   capability_statement_file: str = None, ig_name: str = "FHIR Implementation Guide",
-                                   verbose: bool = True) -> Dict[str, Any]:
+def generate_consolidated_test_plan(client_instance, api_type: str,
+                                    artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
+                                    capability_statement_file: str = None, ig_name: str = "FHIR Implementation Guide",
+                                    verbose: bool = True) -> Dict[str, Any]:
     """
     Process requirements and generate a consolidated test plan using ChromaDB RAG.
     

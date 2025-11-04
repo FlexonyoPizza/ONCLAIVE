@@ -51,11 +51,11 @@ def setup_environment() -> Dict[str, Any]:
     load_dotenv()
     
     # Add project root to sys.path for imports
-    if str(path_helpers.project_root()) not in sys.path:
-        sys.path.insert(0, str(path_helpers.project_root()))
+    if str(path_helpers.PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(path_helpers.PROJECT_ROOT))
     
     # Import LLM utils with better error handling
-    llm_utils_path = Path(__file__).parent.parent / 'pipeline' / 'llm_utils.py'
+    llm_utils_path = path_helpers.PROJECT_ROOT / 'pipeline' / 'llm_utils.py'
     if not llm_utils_path.exists():
         raise FileNotFoundError(f"llm_utils.py not found at {llm_utils_path}")
     
@@ -64,7 +64,7 @@ def setup_environment() -> Dict[str, Any]:
     spec.loader.exec_module(llm_utils)
     
     # Import prompt utilities with better error handling
-    prompt_utils_path = Path(__file__).parent.parent / 'pipeline' / 'prompt_utils.py'
+    prompt_utils_path = path_helpers.PROJECT_ROOT / 'pipeline' / 'prompt_utils.py'
     if not prompt_utils_path.exists():
         raise FileNotFoundError(f"prompt_utils.py not found at {prompt_utils_path}")
     
@@ -898,10 +898,11 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
     }
 
 
-def run_batch_requirements_refinement(artifacts_dir: str, client_instance,
-                                     output_dir: str = "checkpoints/revised_reqs_extraction",
-                                     batch_size: int = 100, api_type: str = "claude",
-                                     ) -> Dict[str, Any]:
+def run_batch_requirements_refinement(client_instance,
+                                      artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
+                                      output_dir: str = "checkpoints/revised_reqs_extraction",
+                                      batch_size: int = 100, api_type: str = "claude",
+                                      ) -> Dict[str, Any]:
     """
     Convenience function to run batch processing with existing setup.
     

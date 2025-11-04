@@ -28,6 +28,7 @@ from itertools import product
 import re
 from uuid import uuid4
 import os
+import path_helpers
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Tuple, Any
@@ -377,7 +378,7 @@ def convert_to_markdown(reqlist: List[Dict[str, Any]], output_dir: str) -> str:
     return output_filename
 
 
-def full_pass(artifacts_dir: str, rag_files: List[str] = None,
+def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT), rag_files: List[str] = None,
               threshold: float = 0.98, output_format: str = 'markdown') -> Dict[str, Any]:
     """
     Complete pipeline for requirement deduplication and consolidation.

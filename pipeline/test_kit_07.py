@@ -39,7 +39,7 @@ from collections import defaultdict
 import prompt_utils
 
 # Constants
-TEST_GEN_PATH = Path(__file__).parent.parent / "prompts" / "test_gen.md"
+TEST_GEN_PATH = path_helpers.PROJECT_ROOT / "prompts" / "test_gen.md"
 
 # System prompts for test generation
 INFERNO_TEST_SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
@@ -225,7 +225,7 @@ def get_dsl_guidance() -> str:
     Returns:
         String containing Inferno DSL guidance for test development
     """
-    guidance_path = Path(__file__).parent.parent / "pipeline" / "dsl-guidance.md"
+    guidance_path = path_helpers.PROJECT_ROOT / "pipeline" / "dsl-guidance.md"
     
     with open(guidance_path, 'r', encoding='utf-8') as f:
         return f.read()
@@ -995,9 +995,11 @@ def llm_validate_and_fix_alignment(client_instance, api_type: str, output_dir: s
         }
 
 
-def generate_inferno_test_kit(client_instance, api_type: str, artifacts_dir: str, ig_name: str = "US Core",
-                             expected_actors: List[str] = None,
-                             enable_validation: bool = True) -> Dict[str, Any]:
+def generate_inferno_test_kit(client_instance, api_type: str,
+                              artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
+                              ig_name: str = "US Core",
+                              expected_actors: List[str] = None,
+                              enable_validation: bool = True) -> Dict[str, Any]:
     """
     Process a test plan and generate an Inferno test kit.
     
