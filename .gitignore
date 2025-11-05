@@ -1,7 +1,7 @@
 .DS_Store
 .env
 .ipynb_checkpoints/
-pipeline/__pycache__
+__pycache__
 pipeline/checkpoints
 reports
 reports_plannet_test_plan
