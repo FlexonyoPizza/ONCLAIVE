@@ -400,7 +400,6 @@ def batch_process_requirements(input_file: str, output_dir: str, client_instance
 
 def run_batch_requirements_refinement(client_instance,
                                       artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
-                                      output_dir: str = "checkpoints/revised_reqs_extraction",
                                       batch_size: int = 100, api_type: str = "claude",
                                       ) -> Dict[str, Any]:
     """
