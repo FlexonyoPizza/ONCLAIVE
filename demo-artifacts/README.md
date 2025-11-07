@@ -11,6 +11,7 @@ The layout for Onclaive artifacts is as follows:
 │   ├── reqs_refinement.md
 │   ├── test_gen.md
 │   └── test_plan.md
+├── rag
 ├── requirements
 │   ├── final
 │   ├── initial_extraction
@@ -36,6 +37,7 @@ In order of the pipeline processing, these are the contents of the directories:
   - `reqs_grouping.md` - prompt for grouping requirements in the test plan
   - `test_plan.md` - prompt for creating the test plan
   - `test_gen.md` - prompt for creating the tests
+- `rag` - markdown files to be used for RAG in requirements extraction
 - `requirements` - the requirements extracted from the IG
   - `initial_extraction` - requirements from the first pass extraction from the
     IG markdown files

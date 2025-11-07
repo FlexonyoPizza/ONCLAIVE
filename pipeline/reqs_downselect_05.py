@@ -378,14 +378,13 @@ def convert_to_markdown(reqlist: List[Dict[str, Any]], output_dir: str) -> str:
     return output_filename
 
 
-def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT), rag_files: List[str] = None,
+def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
               threshold: float = 0.98, output_format: str = 'markdown') -> Dict[str, Any]:
     """
     Complete pipeline for requirement deduplication and consolidation.
     
     Args:
         artifacts_dir: Path to base artifacts directory
-        rag_files: List of RAG JSON files to process (optional)
         threshold: Similarity threshold for duplicate detection (0.0-1.0)
         output_format: Output format ('markdown' or 'json')
         
@@ -403,11 +402,11 @@ def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT), rag_fi
         ValueError: If no input files provided or invalid parameters
     """
     # Validate inputs
-    if rag_files is None:
-        rag_files = []
     input_dir = os.path.join(artifacts_dir, "requirements", "revised")
     md_files = get_md_files_from_directory(input_dir)
+    rag_files = get_md_files_from_directory(os.path.join(artifacts_dir, 'rag'))
     output_dir = os.path.join(artifacts_dir, "requirements", "final")
+
 
     if not md_files and not rag_files:
         raise ValueError("At least one markdown or RAG file must be provided")

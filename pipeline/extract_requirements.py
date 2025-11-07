@@ -81,7 +81,6 @@ reqs_reviewer_04.run_batch_requirements_refinement(
 
 reqs_downselect_05.full_pass(
     artifacts_dir=final_artifacts_dir,
-    rag_files=rag_files, # TODO: add to artifacts dir
     threshold=threshold,
     output_format=output_format
 )
