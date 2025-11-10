@@ -404,7 +404,12 @@ def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
     # Validate inputs
     input_dir = os.path.join(artifacts_dir, "requirements", "revised")
     md_files = get_md_files_from_directory(input_dir)
-    rag_files = get_md_files_from_directory(os.path.join(artifacts_dir, 'rag'))
+    rag_dir = os.path.join(artifacts_dir, 'rag')
+    if os.path.isdir(rag_dir):
+        rag_files = get_md_files_from_directory()
+    else:
+        rag_files = []
+
     output_dir = os.path.join(artifacts_dir, "requirements", "final")
 
 

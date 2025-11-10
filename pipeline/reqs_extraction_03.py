@@ -390,7 +390,7 @@ def process_markdown_content_for_incose_srs(
                     print(f"    Processing chunk {chunk_idx}/{len(chunks)}", end='\r')
                     logging.info(f"Processing chunk {chunk_idx}/{len(chunks)} of combined files")
                     
-                    formatted_content = format_content_for_api(chunk, api_type, chunk_idx, len(chunks))
+                    formatted_content = format_content_for_api(chunk, api_type, chunk_idx, len(chunks), artifacts_dir)
                     
                     # Extract proper text based on API type
                     if api_type == "claude":
