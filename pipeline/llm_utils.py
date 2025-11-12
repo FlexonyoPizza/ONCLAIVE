@@ -143,14 +143,12 @@ class LLMApiClient:
         safety_blocked_count: Counter for safety filter blocks
     """
     
-    def __init__(self, config: Dict = None, verify_path: str = '/opt/homebrew/etc/openssl@3/cert.pem', 
-                 system_prompt: str = None):
+    def __init__(self, config: Dict = None, system_prompt: str = None):
         """
         Initialize clients for each LLM service.
         
         Args:
             config: API configuration dictionary (uses default if None)
-            verify_path: SSL certificate path for Claude client
             system_prompt: Default system prompt for all requests
             
         Raises:
@@ -163,17 +161,16 @@ class LLMApiClient:
         self.system_prompt = system_prompt
         self.safety_blocked_count = 0
 
-        self._initialize_clients(verify_path)
+        self._initialize_clients()
         self.rate_limiter = self._create_rate_limiter(self.config)
 
-    def _initialize_clients(self, verify_path: str) -> None:
+    def _initialize_clients(self) -> None:
         """Initialize all available API clients based on environment variables."""
         try:
             # Claude setup
             claude_api_key = os.getenv('ANTHROPIC_API_KEY')
             if claude_api_key:
                 http_client = httpx.Client(
-                    verify=verify_path if os.path.exists(verify_path) else True,
                     timeout=httpx.Timeout(900.0, connect=300.0),
                     limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
                 )

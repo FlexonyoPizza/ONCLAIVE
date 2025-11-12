@@ -8,6 +8,7 @@ with special handling for hierarchical header numbering from CSS styles.
 from bs4 import BeautifulSoup
 import os
 from pathlib import Path
+import path_helpers
 from langchain_community.document_transformers import MarkdownifyTransformer
 from langchain.schema import Document
 import re
@@ -25,9 +26,8 @@ DEFAULT_EXCLUDE_PATTERNS = [
 
 
 def convert_local_html_to_markdown(
-    input_dir: str, 
-    output_dir: str = "markdown_output", 
-    exclude_patterns: list = None, 
+    artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
+    exclude_patterns: list = None,
     verbose: bool = True
 ) -> dict:
     """
@@ -38,8 +38,7 @@ def convert_local_html_to_markdown(
     while preserving the directory structure.
     
     Args:
-        input_dir: Path to the directory containing HTML files
-        output_dir: Path to save the markdown files (default: "markdown_output")
+        artifacts_dir: Path to the base artifacts directory
         exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
         verbose: Whether to print progress messages
     
@@ -59,11 +58,12 @@ def convert_local_html_to_markdown(
         >>> print(f"Processed {result['processed']} files")
     """
     # Validate input directory
-    input_path = Path(input_dir)
+    input_path = Path(artifacts_dir) / "ig" / "site"
     if not input_path.exists():
-        raise FileNotFoundError(f"Input directory not found: {input_dir}")
-    
-    # Create output directory
+        raise FileNotFoundError(f"IG files in artifacts directory not found: {input_path}")
+
+    output_dir= Path(artifacts_dir) / "ig" / "converted_markdown"
+
     os.makedirs(output_dir, exist_ok=True)
     
     # Use default patterns if none provided
@@ -251,43 +251,3 @@ def _update_header_numbering(header_list: list, current_level: int, prev_level: 
             # Add a 1 to the end
             header_list.append(1)
     return header_list
-
-
-def get_html_file_count(input_dir: str, exclude_patterns: list = None) -> int:
-    """
-    Count HTML files that would be processed (excluding those matching patterns).
-    
-    This function provides a way to preview how many files would be processed
-    without actually performing the conversion.
-    
-    Args:
-        input_dir: Path to the directory containing HTML files
-        exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
-    
-    Returns:
-        Number of HTML files that would be processed
-        
-    Raises:
-        FileNotFoundError: If input directory doesn't exist
-        
-    Example:
-        >>> count = get_html_file_count('input/html')
-        >>> print(f"Will process {count} HTML files")
-    """
-    input_path = Path(input_dir)
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input directory not found: {input_dir}")
-    
-    if exclude_patterns is None:
-        exclude_patterns = DEFAULT_EXCLUDE_PATTERNS
-    
-    compiled_patterns = [re.compile(pattern) for pattern in exclude_patterns]
-    
-    count = 0
-    for file in input_path.glob('**/*.html'):
-        file_str = str(file)
-        exclude = any(pattern.search(file_str) for pattern in compiled_patterns)
-        if not exclude:
-            count += 1
-    
-    return count

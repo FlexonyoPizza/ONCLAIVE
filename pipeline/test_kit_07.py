@@ -29,6 +29,7 @@ Usage:
 import re
 import os
 import logging
+import path_helpers
 import time
 from datetime import datetime
 from pathlib import Path
@@ -36,12 +37,6 @@ from typing import List, Dict, Any, Optional
 from collections import defaultdict
 
 import prompt_utils
-
-# Constants
-CURRENT_DIR = Path.cwd()
-OUTPUT_DIR = os.path.join(CURRENT_DIR, 'test_output')
-PROJECT_ROOT = CURRENT_DIR.parent
-TEST_GEN_PATH = PROJECT_ROOT / "prompts" / "test_gen.md"
 
 # System prompts for test generation
 INFERNO_TEST_SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
@@ -227,7 +222,7 @@ def get_dsl_guidance() -> str:
     Returns:
         String containing Inferno DSL guidance for test development
     """
-    guidance_path = PROJECT_ROOT / "pipeline" / "dsl-guidance.md"
+    guidance_path = path_helpers.PROJECT_ROOT / "pipeline" / "dsl-guidance.md"
     
     with open(guidance_path, 'r', encoding='utf-8') as f:
         return f.read()
@@ -345,8 +340,10 @@ def validate_test_with_llm(client_instance, api_type: str, test_code: str, dsl_g
     return corrected_code
 
 
-def generate_tests_for_section(client_instance, api_type: str, section: Dict[str, Any], dsl_guidance: str,
-                              ig_name: str, max_input_token_limit: int = 16000, enable_validation: bool = True) -> Dict[str, str]:
+def generate_tests_for_section(client_instance, api_type: str, section: Dict[str, Any],
+                               dsl_guidance: str, ig_name: str, artifacts_dir: str,
+                               max_input_token_limit: int = 16000,
+                               enable_validation: bool = True) -> Dict[str, str]:
     """
     Generate tests for an entire section or individual requirements.
     
@@ -356,6 +353,7 @@ def generate_tests_for_section(client_instance, api_type: str, section: Dict[str
         section: Section dictionary containing requirements
         dsl_guidance: Inferno test development guidance
         ig_name: Name of the module for the test
+        artifacts_dir: Path to base artifacts directory
         max_input_token_limit: Maximum tokens for the model
         enable_validation: Whether to perform LLM validation of generated tests
         
@@ -441,7 +439,8 @@ def generate_tests_for_section(client_instance, api_type: str, section: Dict[str
             
             # Prepare the prompt for this requirement with full context
             req_prompt = prompt_utils.load_prompt(
-                str(TEST_GEN_PATH),
+                artifacts_dir,
+                'test_gen.md',
                 test_specification=requirement['full_content'],
                 requirement_id=requirement['id'],
                 ig_name=ig_name,
@@ -997,9 +996,11 @@ def llm_validate_and_fix_alignment(client_instance, api_type: str, output_dir: s
         }
 
 
-def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: str, ig_name: str = "US Core",
-                             output_dir: str = OUTPUT_DIR, expected_actors: List[str] = None,
-                             enable_validation: bool = True) -> Dict[str, Any]:
+def generate_inferno_test_kit(client_instance, api_type: str,
+                              artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
+                              ig_name: str = "US Core",
+                              expected_actors: List[str] = None,
+                              enable_validation: bool = True) -> Dict[str, Any]:
     """
     Process a test plan and generate an Inferno test kit.
     
@@ -1008,9 +1009,8 @@ def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: st
     Args:
         client_instance: LLM client instance
         api_type: API type (claude, gemini, gpt)
-        test_plan_file: Path to test plan markdown file
+        artifacts_dir: Path to base artifacts directory
         ig_name: Name of the module for the tests
-        output_dir: Directory for output files
         expected_actors: List of expected actors in the test plan
         enable_validation: Whether to enable optional LLM validation of generated tests
         
@@ -1027,6 +1027,9 @@ def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: st
     Raises:
         Exception: For various processing errors
     """
+    test_plan_file = os.path.join(artifacts_dir, "test_plan", "test_plan.md")
+    output_dir = os.path.join(artifacts_dir, "tests")
+
     print(f"\n{'='*80}")
     print("INFERNO TEST KIT GENERATION")
     print(f"{'='*80}")
@@ -1093,7 +1096,8 @@ def generate_inferno_test_kit(client_instance, api_type: str, test_plan_file: st
                 api_type, 
                 section, 
                 dsl_guidance,
-                ig_name_camel, 
+                ig_name_camel,
+                artifacts_dir,
                 70000,  # Higher token limit
                 enable_validation
             )

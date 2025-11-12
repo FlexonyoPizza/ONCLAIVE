@@ -8,6 +8,7 @@ navigation elements, and fixing formatting issues from HTML-to-markdown conversi
 import os
 import re
 from pathlib import Path
+import path_helpers
 from typing import Optional
 
 
@@ -141,7 +142,7 @@ def _apply_final_cleanup(content: str) -> str:
     return content
 
 
-def process_directory(input_dir: str, output_dir: str) -> dict:
+def process_directory(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT)) -> dict:
     """
     Process all markdown files in a directory and save cleaned versions.
     
@@ -149,9 +150,8 @@ def process_directory(input_dir: str, output_dir: str) -> dict:
     clean_markdown_file(), and saves the results to the output directory.
     
     Args:
-        input_dir: Directory containing markdown files to process
-        output_dir: Directory to save cleaned files
-        
+        artifacts_dir: Path to base artifacts directory
+
     Returns:
         Dictionary containing processing summary:
             - total_files: Total markdown files found
@@ -167,35 +167,36 @@ def process_directory(input_dir: str, output_dir: str) -> dict:
         >>> result = process_directory('input_md', 'cleaned_md')
         >>> print(f"Processed {result['successful']}/{result['total_files']} files")
     """
-    # Validate input directory
-    input_path = Path(input_dir)
+    input_path = Path(artifacts_dir) / "ig" / "converted_markdown"
+    output_path = Path(artifacts_dir) / "ig" / "cleaned_markdown"
+
     if not input_path.exists():
-        raise FileNotFoundError(f"Input directory not found: {input_dir}")
+        raise FileNotFoundError(f"Markdown files in artifacts directory not found: {input_path}")
     
     # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
     
     # Get all markdown files in the input directory
     md_files = list(input_path.glob('*.md'))
     
-    print(f"Found {len(md_files)} markdown files in {input_dir}")
+    print(f"Found {len(md_files)} markdown files in {input_path}")
     
     successful = 0
     failed = 0
     failed_files = []
     
     for file_path in md_files:
-        output_path = Path(output_dir) / file_path.name
+        output_file_path = output_path / file_path.name
         cleaned_content = clean_markdown_file(str(file_path))
         
         if cleaned_content:
             try:
-                with open(output_path, 'w', encoding='utf-8') as out_file:
+                with open(output_file_path, 'w', encoding='utf-8') as out_file:
                     out_file.write(cleaned_content)
                 successful += 1
-                print(f"Cleaned and saved: {output_path}")
+                print(f"Cleaned and saved: {output_file_path}")
             except Exception as e:
-                print(f"Error writing {output_path}: {str(e)}")
+                print(f"Error writing {output_file_path}: {str(e)}")
                 failed += 1
                 failed_files.append(str(file_path))
         else:

@@ -27,6 +27,8 @@ import re
 import logging
 import time
 import json
+import os
+import path_helpers
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
@@ -39,18 +41,10 @@ import llm_utils
 import prompt_utils
 
 # Constants
-PROJECT_ROOT = Path.cwd().parent
-CURRENT_DIR = Path.cwd()
 
 # System prompt for test plan generation
 SYSTEM_PROMPT = """You are a specialized FHIR testing engineer with expertise in healthcare interoperability.
 Your task is to analyze FHIR Implementation Guide requirements and generate practical, implementable test specifications."""
-
-# Setup the prompt environment
-prompt_env = prompt_utils.setup_prompt_environment(PROJECT_ROOT)
-PROMPT_DIR = prompt_env["prompt_dir"]
-TEST_PLAN_PATH = prompt_env["test_plan_gen_path"]
-REQUIREMENT_GROUPING_PATH = prompt_env["requirement_grouping_path"]
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, 
@@ -212,36 +206,40 @@ def retrieve_relevant_capability_info(requirement: Dict[str, str], collection, n
     return capability_info
 
 
-def get_test_plan_prompt(requirement: str, capability_info: str) -> str:
+def get_test_plan_prompt(requirement: str, capability_info: str, artifacts_dir: str) -> str:
     """
     Load the test plan prompt from file and format it with requirement and capability info.
     
     Args:
         requirement: Formatted requirement string
         capability_info: Retrieved capability information
+        artifacts_dir: Path to base artifacts directory
         
     Returns:
         Formatted prompt for test plan generation
     """
     return prompt_utils.load_prompt(
-        TEST_PLAN_PATH,
+        artifacts_dir,
+        'test_plan.md',
         requirement=requirement,
         capability_info=capability_info
     )
 
 
-def get_requirement_grouping_prompt(requirement: str) -> str:
+def get_requirement_grouping_prompt(requirement: str, artifacts_dir: str) -> str:
     """
     Load the requirement grouping prompt from file and format it with requirement info.
     
     Args:
         requirement: Formatted requirement string
+        artifacts_dir: Path to base artifacts directory
         
     Returns:
         Formatted prompt for requirement grouping
     """
     return prompt_utils.load_prompt(
-        REQUIREMENT_GROUPING_PATH,
+        artifacts_dir,
+        'reqs_grouping.md',
         requirement=requirement
     )
 
@@ -342,7 +340,7 @@ def load_requirements(req_file: str) -> List[Dict[str, Any]]:
         raise ValueError(f"Unsupported file format: {req_file}. Must be .json or .md")
 
 
-def identify_requirement_group(client_instance, api_type: str, req: Dict[str, Any]) -> str:
+def identify_requirement_group(client_instance, api_type: str, req: Dict[str, Any], artifacts_dir: str) -> str:
     """
     Identify the appropriate group for a requirement using LLM analysis.
     
@@ -350,6 +348,7 @@ def identify_requirement_group(client_instance, api_type: str, req: Dict[str, An
         client_instance: LLM client instance
         api_type: Type of API to use ('claude', 'gemini', 'gpt')
         req: Requirement dictionary
+        artifacts_dir: Path to base artifacts directory
         
     Returns:
         Group name for the requirement
@@ -362,7 +361,7 @@ def identify_requirement_group(client_instance, api_type: str, req: Dict[str, An
     formatted_req = format_requirement_for_prompt(requirement)
     
     # Retrieve prompt with the requirement using external file
-    prompt = get_requirement_grouping_prompt(formatted_req)
+    prompt = get_requirement_grouping_prompt(formatted_req, artifacts_dir)
     
     # Make the API request with simplified system prompt
     group_system_prompt = "You are a FHIR expert who categorizes requirements by their functional or resource type."
@@ -375,8 +374,9 @@ def identify_requirement_group(client_instance, api_type: str, req: Dict[str, An
     return group_name
 
 
-def generate_test_specification_with_capability(api_type: str, client_instance, requirement: Dict[str, str],
-                                               capability_collection, verbose: bool = False) -> str:
+def generate_test_specification_with_capability(api_type: str, client_instance,
+                                                requirement: Dict[str, str], capability_collection,
+                                                artifacts_dir: str, verbose: bool = False) -> str:
     """
     Generate a comprehensive test specification using capability info from ChromaDB.
     
@@ -385,6 +385,7 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
         client_instance: LLM client instance
         requirement: Requirement dictionary
         capability_collection: ChromaDB collection for capability statements
+        artifacts_dir: Path to base artifacts directory
         verbose: Whether to print detailed processing information
         
     Returns:
@@ -404,7 +405,7 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
     capability_info = retrieve_relevant_capability_info(req_parsed, capability_collection, verbose=verbose)
 
     # Create prompt with the requirement and capability information
-    prompt = get_test_plan_prompt(formatted_req, capability_info)
+    prompt = get_test_plan_prompt(formatted_req, capability_info, artifacts_dir)
     
     if verbose:
         print(f"Sending request to {api_type.upper()} API...")
@@ -417,10 +418,10 @@ def generate_test_specification_with_capability(api_type: str, client_instance, 
     
     return result
 
-
-def generate_consolidated_test_plan(client_instance, api_type: str, requirements_file: str,
-                                   capability_statement_file: str, ig_name: str = "FHIR Implementation Guide",
-                                   output_dir: str = None, verbose: bool = True) -> Dict[str, Any]:
+def generate_consolidated_test_plan(client_instance, api_type: str,
+                                    artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
+                                    capability_statement_file: str = None, ig_name: str = "FHIR Implementation Guide",
+                                    verbose: bool = True) -> Dict[str, Any]:
     """
     Process requirements and generate a consolidated test plan using ChromaDB RAG.
     
@@ -434,10 +435,9 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
     Args:
         client_instance: LLM client instance
         api_type: Type of API to use ('claude', 'gemini', 'gpt')
-        requirements_file: Path to requirements file (.md or .json)
+        artifacts_dir: Path to base artifacts directory
         capability_statement_file: Path to capability statement file
         ig_name: Name of the implementation guide
-        output_dir: Output directory (uses default if None)
         verbose: Whether to show detailed progress information
         
     Returns:
@@ -449,12 +449,18 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
     Raises:
         Exception: For various processing errors
     """
-    # Set up output directory
-    if output_dir is None:
-        output_dir = Path(CURRENT_DIR, 'test_plan_output')
-    else:
-        output_dir = Path(output_dir)
-    
+    requirements_file = os.path.join(artifacts_dir, "requirements", "final", "consolidated_reqs.md")
+    output_dir = Path(os.path.join(artifacts_dir, "test_plan"))
+    markdown_dir = os.path.join(artifacts_dir, "ig", "cleaned_markdown")
+    capability_statement_files = [f for f in os.listdir(markdown_dir) if re.match(r'.*[cC]apability[Ss]tatement.*\.md', f)]
+    # TODO: handle these better
+    if len(capability_statement_files) < 1:
+      print("No CapabilityStatement markdown file found.")
+      raise
+    elif len(capability_statement_files) > 1:
+      print("Multiple CapabilityStatement markdown files found.")
+      raise
+    capability_statement_file = os.path.join(artifacts_dir, "ig", "cleaned_markdown", capability_statement_files[0])
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
@@ -486,7 +492,7 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
         for i, req in enumerate(requirements, 1):
             req_id = req.get('id', 'UNKNOWN-ID')
             print(f"  Analyzing requirement {i}/{len(requirements)}: {req_id}", end='\r')
-            req_groups[req_id] = identify_requirement_group(client_instance, api_type, req)
+            req_groups[req_id] = identify_requirement_group(client_instance, api_type, req, artifacts_dir)
         
         print(f"  Completed grouping {len(requirements)} requirements                    ")
         
@@ -503,7 +509,6 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
             print(f"  • {group}: {len(reqs)} requirements")
         
         # Generate test plan file
-        #test_plan_path = output_dir / f"{api_type}_test_plan_{timestamp}.md"
         test_plan_path = output_dir / "test_plan.md"
         
         print(f"\nGenerating test specifications...")
@@ -544,7 +549,7 @@ def generate_consolidated_test_plan(client_instance, api_type: str, requirements
                 print(f"  [{processed_count}/{total_reqs}] {req_id}", end='\r')
                 
                 test_spec = generate_test_specification_with_capability(
-                    api_type, client_instance, req, capability_collection, verbose=verbose
+                    api_type, client_instance, req, capability_collection, artifacts_dir, verbose=verbose
                 )
                 
                 # Add to test plan content with proper anchor for TOC linking
