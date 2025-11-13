@@ -5,7 +5,7 @@ This module provides functionality to identify and remove duplicate requirements
 FHIR Implementation Guide requirement lists using semantic similarity analysis.
 
 Features:
-- Load requirements from markdown and RAG JSON files
+- Load requirements from markdown files
 - Generate semantic embeddings using sentence transformers
 - Calculate similarity scores between all requirement pairs
 - Group similar requirements and remove duplicates
@@ -133,69 +133,6 @@ def load_mdfile(mdfile: str) -> List[Dict[str, Any]]:
         all_reqs.append(req)
 
     return all_reqs
-
-
-def rag_parse(rag_json: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Unify RAG-generated requirement headings with standard methodology format.
-    
-    Args:
-        rag_json: Raw RAG requirement dictionary
-        
-    Returns:
-        Parsed requirement dictionary with normalized field names
-    """
-    parsed_rag = {}
-    for key, val in rag_json.items():
-        if key == "Requirement*":
-            parsed_rag['description'] = val
-        else:
-            parsed_rag[key.replace("*", "").lower()] = val
-    return parsed_rag
-
-
-def load_ragfile(ragfile: str) -> List[Dict[str, Any]]:
-    """
-    Load requirements from a RAG-generated JSON file.
-    
-    Expected format: JSON with responses.processed array containing requirement objects.
-    
-    Args:
-        ragfile: Path to RAG JSON file
-        
-    Returns:
-        List of requirement dictionaries extracted from RAG format
-    """
-    ragreq_list = []
-    
-    try:
-        with open(ragfile, 'r', encoding='utf-8') as f:
-            ragreqs = json.load(f)
-    except Exception as e:
-        print(f"Error reading RAG file {ragfile}: {e}")
-        return ragreq_list
-    
-    try:
-        for ragreq in ragreqs['responses']['processed']:
-            if ragreq.get('contains_requirement', False):
-                extracted_reqs = ragreq.get('extracted_requirement', [])
-                for x in extracted_reqs:
-                    if 'Requirement*' in x:
-                        req_obj = {
-                            'text': x['Requirement*'],
-                            'raw': x,
-                            'source': ragfile,
-                            "parsed": rag_parse(x),
-                            "id": str(uuid4())
-                        }
-                        ragreq_list.append(req_obj)
-    except KeyError as e:
-        print(f"Error parsing RAG file structure in {ragfile}: missing key {e}")
-    except Exception as e:
-        print(f"Error processing RAG file {ragfile}: {e}")
-
-    return ragreq_list
-
 
 def generate_embeddings(reqlist: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
@@ -404,17 +341,12 @@ def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
     # Validate inputs
     input_dir = os.path.join(artifacts_dir, "requirements", "revised")
     md_files = get_md_files_from_directory(input_dir)
-    rag_dir = os.path.join(artifacts_dir, 'rag')
-    if os.path.isdir(rag_dir):
-        rag_files = get_md_files_from_directory()
-    else:
-        rag_files = []
 
     output_dir = os.path.join(artifacts_dir, "requirements", "final")
 
 
-    if not md_files and not rag_files:
-        raise ValueError("At least one markdown or RAG file must be provided")
+    if not md_files:
+        raise ValueError("At least one markdown file must be provided")
     
     if not 0.0 <= threshold <= 1.0:
         raise ValueError("Threshold must be between 0.0 and 1.0")
@@ -426,7 +358,6 @@ def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
     print("REQUIREMENT DEDUPLICATION PIPELINE")
     print("=" * 60)
     print(f"Markdown files: {len(md_files)}")
-    print(f"RAG files: {len(rag_files)}")
     print(f"Similarity threshold: {threshold}")
     print(f"Output format: {output_format}")
     print()
@@ -440,13 +371,7 @@ def full_pass(artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
         reqs = load_mdfile(md_file)
         all_reqs.extend(reqs)
         print(f"    Loaded {len(reqs)} requirements")
-        
-    for rag_file in rag_files:
-        print(f"  Processing: {rag_file}")
-        reqs = load_ragfile(rag_file)
-        all_reqs.extend(reqs)
-        print(f"    Loaded {len(reqs)} requirements")
-    
+
     print(f"\nTotal requirements loaded: {len(all_reqs)}")
     
     if not all_reqs:
