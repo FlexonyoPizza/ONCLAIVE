@@ -39,8 +39,8 @@ parser.add_argument(
 
 parser.add_argument(
     '--validate',
-    type=bool,
     default=False,
+    action='store_true',
     help="Whether to enable optional LLM validation of generated tests"
 )
 
