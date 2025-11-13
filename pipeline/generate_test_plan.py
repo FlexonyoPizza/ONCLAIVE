@@ -9,7 +9,7 @@ llm_clients = llm_utils.LLMApiClient()
 
 working_directory = os.getcwd()
 
-demo_artifacts_path = "../artifacts-demo"
+demo_artifacts_path = "demo-artifacts"
 
 parser = argparse.ArgumentParser(
     description="Extract requirements from IG markdown files"
