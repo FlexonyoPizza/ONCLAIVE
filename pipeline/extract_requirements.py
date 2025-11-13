@@ -12,7 +12,7 @@ working_directory = os.getcwd()
 demo_artifacts_path = "../artifacts-demo"
 
 parser = argparse.ArgumentParser(
-    description="Extract requirments from IG markdown files"
+    description="Extract requirements from IG markdown files"
 )
 parser.add_argument(
     'artifacts_dir',
@@ -37,7 +37,7 @@ parser.add_argument(
     '-b', '--batch-size',
     type=int,
     default=25,
-    help="Number of requiremets per batch"
+    help="Number of requirements per batch"
 )
 
 parser.add_argument(

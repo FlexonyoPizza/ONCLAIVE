@@ -10,7 +10,7 @@ working_directory = os.getcwd()
 demo_artifacts_path = "../artifacts-demo"
 
 parser = argparse.ArgumentParser(
-    description="Extract requirments from IG markdown files"
+    description="Extract requirements from IG markdown files"
 )
 parser.add_argument(
     'artifacts_dir',
