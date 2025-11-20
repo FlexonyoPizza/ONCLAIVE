@@ -240,37 +240,6 @@ def create_incose_requirements_extraction_prompt(content: str, chunk_index: int,
     
     return prompt
 
-
-def format_content_for_api(content: str, api_type: str, chunk_index: int,
-                           total_chunks: int, artifacts_dir: str) -> Union[str, List[dict], dict]:
-    """
-    Format content appropriately for each API's expected input format.
-    
-    Args:
-        content: The content to format
-        api_type: Type of API ('claude', 'gemini', 'gpt', 'aip')
-        chunk_index: Index of this chunk
-        total_chunks: Total number of chunks
-        
-    Returns:
-        Formatted content ready for API consumption
-    """
-    base_prompt = create_incose_requirements_extraction_prompt(content, chunk_index, total_chunks, artifacts_dir)
-    
-    if api_type == "claude":
-        return [{
-            "type": "text",
-            "text": base_prompt
-        }]
-    elif api_type == "gemini":
-        return [{  
-            "parts": [{
-                "text": base_prompt
-            }]
-        }]
-    return base_prompt
-
-
 def process_markdown_content_for_incose_srs(
     client_instance, 
     api_type: str,
@@ -339,17 +308,9 @@ def process_markdown_content_for_incose_srs(
                 for chunk_idx, chunk in enumerate(chunks, 1):
                     print(f"    Processing chunk {chunk_idx}/{len(chunks)}", end='\r')
                     logging.info(f"Processing chunk {chunk_idx}/{len(chunks)} of {group[0]}")
-                    
-                    formatted_content = format_content_for_api(chunk, api_type, chunk_idx, len(chunks), artifacts_dir)
-                    
-                    # Extract proper text based on API type
-                    if api_type == "claude":
-                        prompt_text = formatted_content[0]["text"]
-                    elif api_type == "gemini":
-                        prompt_text = formatted_content[0]["parts"][0]["text"]
-                    else:
-                        prompt_text = formatted_content
-                    
+
+                    prompt_text = create_incose_requirements_extraction_prompt(chunk, chunk_idx, len(chunks), artifacts_dir)
+
                     try:
                         response = client_instance.make_llm_request(api_type, prompt_text, sys_prompt=SYSTEM_PROMPTS[api_type])
                         all_requirements.append(response)
@@ -389,17 +350,9 @@ def process_markdown_content_for_incose_srs(
                 for chunk_idx, chunk in enumerate(chunks, 1):
                     print(f"    Processing chunk {chunk_idx}/{len(chunks)}", end='\r')
                     logging.info(f"Processing chunk {chunk_idx}/{len(chunks)} of combined files")
-                    
-                    formatted_content = format_content_for_api(chunk, api_type, chunk_idx, len(chunks), artifacts_dir)
-                    
-                    # Extract proper text based on API type
-                    if api_type == "claude":
-                        prompt_text = formatted_content[0]["text"]
-                    elif api_type == "gemini":
-                        prompt_text = formatted_content[0]["parts"][0]["text"]
-                    else:
-                        prompt_text = formatted_content
-                    
+
+                    prompt_text = create_incose_requirements_extraction_prompt(chunk, chunk_idx, len(chunks), artifacts_dir)
+
                     try:
                         response = client_instance.make_llm_request(api_type, prompt_text, SYSTEM_PROMPTS[api_type])
                         all_requirements.append(response)
