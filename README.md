@@ -75,9 +75,7 @@ After cloning the repository:
    To open a file using the command line, run `jupyter notebook`
    This will open a web browser showing the Jupyter file explorer. Navigate to the notebook you want to run and click on it.
 
-4. If you encounter SSL certificate issues with API requests, modify the `verify_path` variable in the `setup_clients()` function in `llm_utils.py` file.
-
-5. Configure APIs: Configurations for individual APIs can be changed in the llm_utils.py file depending on rate/token limits of user's accounts.
+4. Configure APIs: Configurations for individual APIs can be changed in the llm_utils.py file depending on rate/token limits of user's accounts.
 
 ## LLM Set Up
 
