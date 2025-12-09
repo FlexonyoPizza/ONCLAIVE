@@ -17,12 +17,12 @@ SYSTEM_PROMPTS = {
 
 def create_difference_prompt(new_ig_content: str, old_ig_content: str, artifacts_dir: str) -> str:
     """
-    Create a prompt for extracting requirements in INCOSE format using external prompt file.
+    Create a prompt for finding differences between IG versions.
 
     Args:
-        content: The content to analyze
-        chunk_index: Index of this chunk in the total content (1-based)
-        total_chunks: Total number of chunks being processed
+        new_ig_content: The content from the new version of the IG to analyze
+        old_ig_content: The content from the old version of the IG to analyze
+        artifacts_dir: Path to the base artifacts directory
 
     Returns:
         The formatted prompt for the LLM

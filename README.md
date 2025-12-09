@@ -93,6 +93,16 @@ Go to Dashboard > [API Keys](https://platform.openai.com/api-keys) in an OpenAI 
 
 Create a Gemini [API Key](https://aistudio.google.com/app/apikey?_gl=1*nc11k*_ga*OTIzNzIyMjM0LjE3MzYzNjM5Nzc.*_ga_P1DBVKWT6V*MTczNjM2Mzk3Ni4xLjAuMTczNjM2Mzk3Ni42MC4wLjEyOTEyNzA3OTM.) in Google AI Studio. Billing can also be set up within Studio however many of the services are free of charge until specific rate limits are met. See pricing information [here](https://ai.google.dev/pricing?_gl=1*1ktr08b*_ga*OTIzNzIyMjM0LjE3MzYzNjM5Nzc.*_ga_P1DBVKWT6V*MTczNjM2Mzk3Ni4xLjEuMTczNjM2Mzk3OS41Ny4wLjEyOTEyNzA3OTM.#1_5flash).
 
+## Analyzing differences between US Core versions
+
+The `us_core_differences` folder contains scripts to detect differences in the IG narrative between versions of the US Core IG. The `process_igs.py` script will download two versions of the IG, extract the narrative from html files, and convert it to markdown. The `compare_igs.py` script will identify differences in the narrative between the two versions. The differences will be outputted to `ARTIFACTS_DIRECTORY/ig/differences.md`.
+
+```sh
+> uv run us_core_differences/process_igs.py -n https://hl7.org/fhir/us/core/STU8/full-ig.zip -o https://hl7.org/fhir/us/core/STU7/full-ig.zip ../us-core-comparison
+
+> uv run us_core_differences/compare_igs.py ../us-core-comparison
+```
+
 ## License
 
 ⓒ2025 The MITRE Corporation.

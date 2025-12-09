@@ -1,9 +1,3 @@
-"""
-HTML to Markdown Converter Module
-
-This module provides functionality to convert HTML files to Markdown format,
-with special handling for hierarchical header numbering from CSS styles.
-"""
 import sys
 import os
 
@@ -30,16 +24,6 @@ DEFAULT_EXCLUDE_PATTERNS = [
     r'\.profile\.history\.html$',
     r'(?i)example'
 ]
-
-SYSTEM_PROMPTS = {
-    "claude": """You are a seasoned Healthcare Integration Test Engineer with expertise determining the requirements present in FHIR Implementation Guiedes.""",
-    "gemini": """You are a Healthcare Integration Test Engineer with expertise in INCOSE Systems Engineering standards, analyzing FHIR
-    Implementation Guide content to identify and format testable requirements following INCOSE specifications.""",
-    "gpt": """As a Healthcare Integration Test Engineer with INCOSE Systems Engineering expertise, analyze this FHIR
-    Implementation Guide content to extract specific testable requirements in INCOSE-compliant format.""",
-    "aip": """As a Healthcare Integration Test Engineer with INCOSE Systems Engineering expertise, analyze this FHIR
-    Implementation Guide content to extract specific testable requirements in INCOSE-compliant format."""
-}
 
 def convert_local_html_to_markdown(
     artifacts_dir: str = str(path_helpers.DEMO_ARTIFACTS_ROOT),
@@ -288,25 +272,10 @@ def download_and_extract_ig_html(
         artifacts_dir: Path to the base artifacts directory
         verbose: Whether to print progress messages
 
-    Returns:
-        Dictionary containing extraction summary:
-            - old_html_count: Number of html files extracted from old zip
-            - new_html_count: Number of html files extracted from new zip
-            - old_zip_size: Size of old zip file in bytes
-            - new_zip_size: Size of new zip file in bytes
-            - errors: List of any errors encountered
-
     Raises:
         requests.RequestException: If download fails
         zipfile.BadZipFile: If zip file is corrupted
         PermissionError: If unable to create directories or write files
-
-    Example:
-        >>> result = download_and_extract_html_from_zips(
-        ...     'https://example.com/old.zip',
-        ...     'https://example.com/new.zip'
-        ... )
-        >>> print(f"Extracted {result['old_html_count']} old files")
     """
     artifacts_path = Path(artifacts_dir)
     old_ig_dir = artifacts_path / "ig" / "site" / "old"
@@ -318,12 +287,6 @@ def download_and_extract_ig_html(
 
     if verbose:
         print(f"Created directories: {old_ig_dir} and {new_ig_dir}")
-
-    errors = []
-    old_html_count = 0
-    new_html_count = 0
-    old_zip_size = 0
-    new_zip_size = 0
 
     # Process both zip files
     zip_configs = [
@@ -340,10 +303,6 @@ def download_and_extract_ig_html(
             response.raise_for_status()
 
             zip_size = int(response.headers.get('content-length', 0))
-            if config['name'] == 'old':
-                old_zip_size = zip_size
-            else:
-                new_zip_size = zip_size
 
             if verbose:
                 print(f"Downloaded {config['name']} zip file ({zip_size} bytes)")
@@ -361,11 +320,6 @@ def download_and_extract_ig_html(
                     verbose
                 )
 
-                if config['name'] == 'old':
-                    old_html_count = html_count
-                else:
-                    new_html_count = html_count
-
                 if verbose:
                     print(f"Extracted {html_count} html files from {config['name']} zip")
 
@@ -374,35 +328,18 @@ def download_and_extract_ig_html(
 
         except requests.RequestException as e:
             error_msg = f"Failed to download {config['name']} zip from {config['url']}: {str(e)}"
-            errors.append(error_msg)
             if verbose:
                 print(f"Error: {error_msg}")
 
         except zipfile.BadZipFile as e:
             error_msg = f"Invalid zip file for {config['name']}: {str(e)}"
-            errors.append(error_msg)
             if verbose:
                 print(f"Error: {error_msg}")
 
         except Exception as e:
             error_msg = f"Unexpected error processing {config['name']} zip: {str(e)}"
-            errors.append(error_msg)
             if verbose:
                 print(f"Error: {error_msg}")
-
-    if verbose:
-        print(f"Extraction complete. Old: {old_html_count} files, New: {new_html_count} files")
-    if errors:
-        print(f"Encountered {len(errors)} errors during processing")
-
-    return {
-        'old_html_count': old_html_count,
-        'new_html_count': new_html_count,
-        'old_zip_size': old_zip_size,
-        'new_zip_size': new_zip_size,
-        'errors': errors
-    }
-
 
 def _extract_html_files(zip_path: str, target_dir: Path, verbose: bool = True) -> int:
     """

@@ -1,10 +1,3 @@
-"""
-Markdown Cleaner Module
-
-This module provides functionality to clean markdown files by removing header/footer content,
-navigation elements, and fixing formatting issues from HTML-to-markdown conversions.
-"""
-
 import os
 import re
 from pathlib import Path
@@ -162,19 +155,11 @@ def _remove_formal_views_section(markdown_content: str) -> str:
     """
     Remove content between "Formal Views of Profile Content" and "Notes" sections.
 
-    This function removes all lines between and including the line containing
-    "Formal Views of Profile Content" up to (but not including) the line containing "Notes".
-
     Args:
         markdown_content: The input markdown content as a string
 
     Returns:
         The markdown content with the formal views section removed
-
-    Example:
-        >>> content = "Some text\\n### Formal Views of Profile Content\\nTable content\\n### Notes:\\nMore text"
-        >>> result = remove_formal_views_section(content)
-        >>> # Result will be: "Some text\\n### Notes:\\nMore text"
     """
     lines = markdown_content.split('\n')
     result_lines = []
@@ -195,6 +180,15 @@ def _remove_formal_views_section(markdown_content: str) -> str:
     return '\n'.join(result_lines)
 
 def _remove_quick_start(markdown_content: str) -> str:
+    """
+    Remove the quick start section of the profile narrative.
+
+    Args:
+        markdown_content: The input markdown content as a string
+
+    Returns:
+        The markdown content with the quick start section removed
+    """
     lines = markdown_content.split('\n')
     result_lines = []
 
@@ -209,6 +203,15 @@ def _remove_quick_start(markdown_content: str) -> str:
     return '\n'.join(result_lines)
 
 def _remove_usages_section(markdown_content: str) -> str:
+    """
+    Remove the usages section of the profile narrative.
+
+    Args:
+        markdown_content: The input markdown content as a string
+
+    Returns:
+        The markdown content with the usages section removed
+    """
     lines = markdown_content.split('\n')
     result_lines = []
 
@@ -228,6 +231,15 @@ def _remove_usages_section(markdown_content: str) -> str:
     return '\n'.join(result_lines)
 
 def _remove_changes_section(markdown_content: str) -> str:
+    """
+    Remove the changes section of the profile narrative.
+
+    Args:
+        markdown_content: The input markdown content as a string
+
+    Returns:
+        The markdown content with the changes section removed
+    """
     lines = markdown_content.split('\n')
     result_lines = []
 
