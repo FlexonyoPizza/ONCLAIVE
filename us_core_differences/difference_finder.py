@@ -4,8 +4,16 @@ import os
 pipeline_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'pipeline'))
 sys.path.append(pipeline_path)
 
+from pathlib import Path
 import prompt_utils
 from llm_utils import SafetyFilterException
+
+SYSTEM_PROMPTS = {
+    "claude": """You are a seasoned Healthcare Integration Test Engineer with expertise determining the requirements present in FHIR Implementation Guides.""",
+    "gemini": """You are a Healthcare Integration Test Engineer with expertise determining the requirements present in FHIR Implementation Guides.""",
+    "gpt": """As a Healthcare Integration Test Engineer with expertise determining the requirements present in FHIR Implementation Guides, analyze these IG narratives for differences in requirements.""",
+    "aip": """As a Healthcare Integration Test Engineer with expertise determining the requirements present in FHIR Implementation Guides, analyze these IG narratives for differences in requirements."""
+}
 
 def create_difference_prompt(new_ig_content: str, old_ig_content: str, artifacts_dir: str) -> str:
     """

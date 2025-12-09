@@ -4,6 +4,11 @@ HTML to Markdown Converter Module
 This module provides functionality to convert HTML files to Markdown format,
 with special handling for hierarchical header numbering from CSS styles.
 """
+import sys
+import os
+
+pipeline_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'pipeline'))
+sys.path.append(pipeline_path)
 
 from bs4 import BeautifulSoup
 import os

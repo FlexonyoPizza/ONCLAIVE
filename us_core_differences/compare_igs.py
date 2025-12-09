@@ -39,6 +39,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+api_type = args.api_type
 relative_artifacts_dir = args.artifacts_dir
 verbose = args.verbose
 
