@@ -30,18 +30,10 @@ parser.add_argument(
     help="Which llm api to use"
 )
 
-parser.add_argument(
-    '-v', '--verbose',
-    default=False,
-    action='store_true',
-    help="Enable verbose logging"
-)
-
 args = parser.parse_args()
 
 api_type = args.api_type
 relative_artifacts_dir = args.artifacts_dir
-verbose = args.verbose
 
 final_artifacts_dir = os.path.abspath(os.path.join(working_directory, relative_artifacts_dir))
 

@@ -56,7 +56,7 @@ ig_narrative_extractor.download_and_extract_ig_html(
     artifacts_dir=final_artifacts_dir,
     old_ig_url=old_ig_url,
     new_ig_url=new_ig_url,
-    verbose=True
+    verbose=verbose
 )
 
 result = ig_narrative_extractor.convert_local_html_to_markdown(
