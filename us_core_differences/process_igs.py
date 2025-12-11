@@ -18,15 +18,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '-o', '--old-ig-url',
+    '-o', '--old-ig-location',
     required=True,
-    help="URL of full IG package for old IG version"
+    help="URL or relative file path of full IG package for old IG version"
 )
 
 parser.add_argument(
-    '-n', '--new-ig-url',
+    '-n', '--new-ig-location',
     required=True,
-    help="URL of full IG package for new IG version"
+    help="URL or relative file path of full IG package for new IG version"
 )
 
 parser.add_argument(
@@ -45,8 +45,8 @@ parser.add_argument(
 args = parser.parse_args()
 
 relative_artifacts_dir = args.artifacts_dir
-old_ig_url = args.old_ig_url
-new_ig_url = args.new_ig_url
+old_ig_location = args.old_ig_location
+new_ig_location = args.new_ig_location
 verbose = args.verbose
 exclude_patterns = args.exclude_pattern
 
@@ -54,8 +54,8 @@ final_artifacts_dir = os.path.abspath(os.path.join(working_directory, relative_a
 
 ig_narrative_extractor.download_and_extract_ig_html(
     artifacts_dir=final_artifacts_dir,
-    old_ig_url=old_ig_url,
-    new_ig_url=new_ig_url,
+    old_ig_location=old_ig_location,
+    new_ig_location=new_ig_location,
     verbose=verbose
 )
 

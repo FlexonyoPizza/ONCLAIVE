@@ -32,27 +32,27 @@ def convert_local_html_to_markdown(
 ) -> dict:
     """
     Convert HTML files from a local directory to markdown, excluding files matching specific patterns.
-    
+
     This function recursively processes all HTML files in the input directory,
     applies header numbering based on CSS styles, and converts them to Markdown format
     while preserving the directory structure.
-    
+
     Args:
         artifacts_dir: Path to the base artifacts directory
         exclude_patterns: List of regex patterns to exclude. If None, uses DEFAULT_EXCLUDE_PATTERNS
         verbose: Whether to print progress messages
-    
+
     Returns:
         Dictionary containing conversion summary:
             - total_files: Total HTML files found
             - processed: Number of files successfully processed
             - errors: Number of files that encountered errors
             - error_files: List of files that had errors
-            
+
     Raises:
         FileNotFoundError: If input directory doesn't exist
         PermissionError: If unable to create output directory or write files
-        
+
     Example:
         >>> result = convert_local_html_to_markdown('input/html', 'output/md')
         >>> print(f"Processed {result['processed']} files")
@@ -137,7 +137,7 @@ def convert_local_html_to_markdown(
         # Print summary
         if verbose:
             print(f"Conversion complete. Successfully processed {processed} files. Encountered {errors} errors.")
-    
+
     return {
         'total_files': len(html_files),
         'processed': processed,
@@ -149,18 +149,18 @@ def convert_local_html_to_markdown(
 def _process_html_headers(html_content: str, html_file: Path, verbose: bool = True) -> str:
     """
     Process HTML headers to add hierarchical numbering based on CSS styles.
-    
+
     This function extracts header numbering patterns from CSS --heading-prefix variables
     and applies hierarchical numbering to all h1-h6 elements in the document.
-    
+
     Args:
         html_content: The HTML content to process
         html_file: Path to the HTML file (used for error reporting)
         verbose: Whether to print warning messages for processing failures
-    
+
     Returns:
         Processed HTML content with numbered headers, or original content if processing fails
-        
+
     Note:
         The function looks for CSS variables in the format:
         h{level} { --heading-prefix: "1.2.3"; }
@@ -168,16 +168,16 @@ def _process_html_headers(html_content: str, html_file: Path, verbose: bool = Tr
     """
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
-        
+
         # Find the style tag with CSS heading prefix information
         style_tag = soup.find("style", attrs={'type': 'text/css'})
-        
+
         if not (style_tag and style_tag.text):
             return html_content
-            
+
         # Look for heading prefix pattern in CSS
         h_prefix_match = re.search(
-            r'(h[0-9])\s*\{\s*--heading-prefix\s*:\s*"([0-9]+(?:\.[0-9]+)*)"', 
+            r'(h[0-9])\s*\{\s*--heading-prefix\s*:\s*"([0-9]+(?:\.[0-9]+)*)"',
             style_tag.text
         )
 
@@ -187,10 +187,10 @@ def _process_html_headers(html_content: str, html_file: Path, verbose: bool = Tr
             if 'h2:before{color:silver;counter-increment:section;content:var(--heading-prefix) " ";}' in tag.text:
                 css_style_tag = tag.text
                 break
-            
+
         if not h_prefix_match:
             return html_content
-            
+
         # Extract the starting header level and numbering
         starting_header_level = int(h_prefix_match.group(1)[1:])
         prev_level = starting_header_level - 1
@@ -199,28 +199,28 @@ def _process_html_headers(html_content: str, html_file: Path, verbose: bool = Tr
         # If the CSS styling is not present, we want to add a 1 as a digit (see 14.2.1 in US Core IG)
         if css_style_tag == None:
             header_list.append(1)
-        
+
         # Process all headers in the document
         for header in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
             header_level = int(header.name[1:])
-            
+
             # Adjust header numbering based on level changes
             header_list = _update_header_numbering(header_list, header_level, prev_level, starting_header_level)
-            
+
             # Create the numbered header text
             header_number = ".".join(str(x) for x in header_list)
             markdown_header = " ".join([
-                "#" * header_level, 
-                header_number, 
+                "#" * header_level,
+                header_number,
                 header.get_text(strip=True)
             ])
-            
+
             # Replace the original header with numbered version
             header.replace_with(markdown_header)
             prev_level = header_level
-        
+
         return str(soup)
-        
+
     except Exception as header_error:
         if verbose:
             print(f"Warning: Header processing failed for {html_file}: {str(header_error)}")
@@ -254,27 +254,32 @@ def _update_header_numbering(header_list: list, current_level: int, prev_level: 
     return header_list
 
 
+def _is_url(path_or_url: str) -> bool:
+    return path_or_url.startswith(('http://', 'https://'))
+
 def download_and_extract_ig_html(
-    old_ig_url: str,
-    new_ig_url: str,
+    old_ig_location: str,
+    new_ig_location: str,
     artifacts_dir: str,
     verbose: bool = False
 ) -> dict:
     """
-    Download two specified zip files and extract all html files to separate folders.
+    Download or load two specified IG sources and extract all html files to separate folders.
 
-    This function downloads zip files from the provided URLs, extracts all html files,
-    and organizes them into ig/old_ig and ig/new_ig directories under the artifacts folder.
+    This function handles both URLs and local file paths. For URLs, it downloads zip files
+    and extracts HTML files. For local paths, it handles both zip files and directories
+    containing HTML files directly.
 
     Args:
-        old_ig_url: URL of the first (old) zip file to download
-        new_ig_url: URL of the second (new) zip file to download
+        old_ig_location: URL or local path of the first (old) IG source
+        new_ig_location: URL or local path of the second (new) IG source
         artifacts_dir: Path to the base artifacts directory
         verbose: Whether to print progress messages
 
     Raises:
-        requests.RequestException: If download fails
+        requests.RequestException: If download fails (for URLs)
         zipfile.BadZipFile: If zip file is corrupted
+        FileNotFoundError: If local path doesn't exist
         PermissionError: If unable to create directories or write files
     """
     artifacts_path = Path(artifacts_dir)
@@ -288,46 +293,70 @@ def download_and_extract_ig_html(
     if verbose:
         print(f"Created directories: {old_ig_dir} and {new_ig_dir}")
 
-    # Process both zip files
-    zip_configs = [
-        {"url": old_ig_url, "target_dir": old_ig_dir, "name": "old"},
-        {"url": new_ig_url, "target_dir": new_ig_dir, "name": "new"}
+    # Process both IG sources (URLs or local zip files)
+    ig_configs = [
+        {"source": old_ig_location, "target_dir": old_ig_dir, "name": "old"},
+        {"source": new_ig_location, "target_dir": new_ig_dir, "name": "new"}
     ]
 
-    for config in zip_configs:
+    for config in ig_configs:
         try:
-            if verbose:
-                print(f"Downloading {config['name']} zip file from: {config['url']}")
+            if _is_url(config['source']):
+                # Handle URL - download zip file
+                if verbose:
+                    print(f"Downloading {config['name']} zip file from: {config['source']}")
 
-            response = requests.get(config['url'], stream=True, timeout=30)
-            response.raise_for_status()
+                response = requests.get(config['source'], stream=True, timeout=30)
+                response.raise_for_status()
 
-            zip_size = int(response.headers.get('content-length', 0))
+                zip_size = int(response.headers.get('content-length', 0))
 
-            if verbose:
-                print(f"Downloaded {config['name']} zip file ({zip_size} bytes)")
+                if verbose:
+                    print(f"Downloaded {config['name']} zip file ({zip_size} bytes)")
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as temp_zip:
-                # Write zip content
-                for chunk in response.iter_content(chunk_size=8192):
-                    temp_zip.write(chunk)
-                temp_zip_path = temp_zip.name
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as temp_zip:
+                    # Write zip content
+                    for chunk in response.iter_content(chunk_size=8192):
+                        temp_zip.write(chunk)
+                    temp_zip_path = temp_zip.name
 
-            try:
+                try:
+                    html_count = _extract_html_files(
+                        temp_zip_path,
+                        config['target_dir'],
+                        verbose
+                    )
+
+                    if verbose:
+                        print(f"Extracted {html_count} html files from {config['name']} zip")
+
+                finally:
+                    os.unlink(temp_zip_path)
+
+            else:
+                # Handle local zip file
+                local_path = Path(os.path.abspath(os.path.join(os.getcwd(), config['source'])))
+
+                if not local_path.exists():
+                    raise FileNotFoundError(f"Local zip file does not exist: {local_path}")
+
+                if not local_path.is_file() or local_path.suffix.lower() != '.zip':
+                    raise ValueError(f"Local path must be a zip file, got: {local_path}")
+
+                if verbose:
+                    print(f"Extracting {config['name']} from local zip file: {local_path}")
+
                 html_count = _extract_html_files(
-                    temp_zip_path,
+                    str(local_path),
                     config['target_dir'],
                     verbose
                 )
 
                 if verbose:
-                    print(f"Extracted {html_count} html files from {config['name']} zip")
-
-            finally:
-                os.unlink(temp_zip_path)
+                    print(f"Extracted {html_count} html files from {config['name']} local zip")
 
         except requests.RequestException as e:
-            error_msg = f"Failed to download {config['name']} zip from {config['url']}: {str(e)}"
+            error_msg = f"Failed to download {config['name']} from {config['source']}: {str(e)}"
             if verbose:
                 print(f"Error: {error_msg}")
 
@@ -336,8 +365,13 @@ def download_and_extract_ig_html(
             if verbose:
                 print(f"Error: {error_msg}")
 
+        except FileNotFoundError as e:
+            error_msg = f"Local file not found for {config['name']}: {str(e)}"
+            if verbose:
+                print(f"Error: {error_msg}")
+
         except Exception as e:
-            error_msg = f"Unexpected error processing {config['name']} zip: {str(e)}"
+            error_msg = f"Unexpected error processing {config['name']} from {config['source']}: {str(e)}"
             if verbose:
                 print(f"Error: {error_msg}")
 
