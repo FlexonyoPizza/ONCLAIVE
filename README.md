@@ -95,7 +95,7 @@ Create a Gemini [API Key](https://aistudio.google.com/app/apikey?_gl=1*nc11k*_ga
 
 ## Analyzing differences between US Core versions
 
-The `us_core_differences` folder contains scripts to detect differences in the IG narrative between versions of the US Core IG. The `process_igs.py` script will download two versions of the IG, extract the narrative from html files, and convert it to markdown. The `compare_igs.py` script will identify differences in the narrative between the two versions. The differences will be outputted to `ARTIFACTS_DIRECTORY/ig/differences.md`.
+The `us_core_differences` folder contains scripts to detect differences in the IG narrative between versions of the US Core IG. The `process_igs.py` script will download two versions of the IG, extract the narrative from html files, and convert it to markdown. The `compare_igs.py` script will identify differences in the narrative between the two versions. The differences will be outputted to `<input_artifacts_dir>/ig/differences.md`.
 
 ```sh
 > uv run us_core_differences/process_igs.py -n https://hl7.org/fhir/us/core/STU8/full-ig.zip -o https://hl7.org/fhir/us/core/STU7/full-ig.zip ../us-core-comparison
