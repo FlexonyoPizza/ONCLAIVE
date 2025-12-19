@@ -432,7 +432,8 @@ def _extract_html_files(zip_path: str, target_dir: Path, verbose: bool = True) -
         re.compile(r"\.profile\.ttl\.html$"),
         re.compile(r"\.profile\.xml\.html$"),
         re.compile(r"^ipa-comparison-"),
-        re.compile(r"^comparison-")
+        re.compile(r"^comparison-"),
+        re.compile(r"^qa*")
     ]
 
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
