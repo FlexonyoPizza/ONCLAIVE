@@ -72,13 +72,13 @@ def compare_narrative(client_instance, artifacts_dir: str, api_type: str):
         except SafetyFilterException as e:
             client_instance.safety_blocked_count += 1
             print(f"\nSAFETY FILTER BLOCKED CONTENT #{client_instance.safety_blocked_count}")
-            print(f"File: {group[0]} - Chunk {chunk_idx}/{len(chunks)}")
+            print(f"File: {new_ig_file_path.name}")
             print("=" * 60)
             print("BLOCKED CONTENT SAMPLE:")
             print(e.blocked_content)
             print("=" * 60)
             print("Skipping this chunk and continuing...\n")
-            all_requirements.append("## CHUNK SKIPPED DUE TO SAFETY FILTER\n[Content blocked by safety filters]\n\n")
+            all_changes[new_ig_file_path.name] = "## CHUNK SKIPPED DUE TO SAFETY FILTER\n[Content blocked by safety filters]\n\n"
 
     final_content = ""
     for filename, differences in all_changes.items():

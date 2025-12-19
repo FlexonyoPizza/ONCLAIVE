@@ -192,8 +192,6 @@ def _remove_quick_start(markdown_content: str) -> str:
     lines = markdown_content.split('\n')
     result_lines = []
 
-    in_formal_views_section = False
-
     for line in lines:
         if line == "**Quick Start**":
           break
