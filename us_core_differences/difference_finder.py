@@ -66,6 +66,7 @@ def compare_narrative(client_instance, artifacts_dir: str, api_type: str):
         prompt_text = create_difference_prompt(new_file_content, old_file_content, artifacts_dir)
 
         try:
+            print(f"Comparing: {new_ig_file_path.name}")
             response = client_instance.make_llm_request(api_type, prompt_text, sys_prompt=SYSTEM_PROMPTS[api_type])
             all_changes[new_ig_file_path.name] = response
         except SafetyFilterException as e:
