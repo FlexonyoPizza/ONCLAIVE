@@ -4,6 +4,58 @@
 
 This repository includes a set of scripts that are run together as part of a pipeline to take in a FHIR implementation guide, extract requirements, generate a test plan, and develop Inferno test kits to test API standards conformance. Each phase of the pipeline uses generative AI to review IG-related inputs and create the outputs for the next phase of the pipeline.
 
+## Input/Output Artifacts
+
+When running the pipeline, the user specifies a folder as a location for all of the artifacts associated with the current pipeline run. The pipeline is designed so that each step reads its inputs from and writes its outputs to specific locations in the artifacts folder. The organization of this folder is described in the [demo-artifacts README](demo-artifacts/README.md).
+
+## Running the Pipeline
+
+After performing initial setup, the pipeline can be run using the command line or a jupyter notebook.
+
+### Initial Setup
+
+After cloning the repository:
+
+1. Setup APIs of interest:
+
+   - LLMs of interest can be setup in the `llm_utils.py` file
+   - Individual API keys will need to be generated for each model of interest to fully run each notebook using the selected API (see below for instructions). API keys should be saved in a .env file in the root directory.
+
+     Example:
+
+     ANTHROPIC_API_KEY=your_anthropic_key_here
+
+     GEMINI_API_KEY=your_gemini_key_here
+
+     OPENAI_API_KEY=your_openai_key_here
+
+2. Install dependencies: This will install all necessary packages including API clients as well as data processing libraries. This repository now uses [UV](https://docs.astral.sh/uv/) for Python dependency and project management. You can install UV with the following command, `curl -LsSf https://astral.sh/uv/install.sh | sh` or browse the [Installation Methods](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) page in the documentation.
+
+3. Place the html files from the IG you're running the pipeline against in `YOUR_ARTIFACTS_FOLDER/ig/site`.
+
+### Command Line
+
+The following commands run the scripts for each step of the pipeline:
+
+```shell
+uv run pipeline/process_ig.py
+uv run pipeline/extract_requirements.py
+uv run pipeline/generate_test_plan.py
+uv run pipeline/generate_tests.py
+```
+
+If no other arguments are provided, the scripts will use the [demo-artifacts folder](demo-artifacts) as the location for all input/output. Each script can be run with `-h` to see information on other available arguments.
+
+### Jupyter Notebook
+
+1. Start Jupyter: Start Jupyter to explore and run the notebooks.
+   Jupyter notebooks can be run locally using the command line or by opening notebook files in IDEs of choice.
+
+   To open a file using the command line, run `jupyter notebook`
+   This will open a web browser showing the Jupyter file explorer. Navigate to the notebook you want to run and click on it.
+
+2. Configure APIs: Configurations for individual APIs can be changed in the llm_utils.py file depending on rate/token limits of user's accounts.
+
 ## Pipeline Scripts & Files
 
 ### Utilities Files
@@ -42,44 +94,9 @@ The entire pipeline can be run using the Jupyter notebook `full_pipeline.ipynb` 
 - `test_kit_07.py`: Notebook to take in a test plan and develop a set of tests to cover the testable IG requirements. Seventh step of pipeline
 - `checkpoints/test_kit_generation`: Outputs from test kit generation step will save here
 
-### Prompts
-
-LLM prompts for the various notebooks can be found in the `prompts` folder. Prompts in their current state were optimized for the available LLM models at the time of the pipeline's development. Prompts can be revised to alter instructions or content of the outputs at each step, as well as to work better with different LLM models.
-
-## Working with the Pipeline
-
-The notebook and scripts listed above work with the files saved in the `full-ig` folder.
-
-Other IGs can be used with this pipeline. To do so, download the IG and save the files under the `full-ig` folder. The notebook will pull from the `site` folder under `full-ig`.
-
-After cloning the repository:
-
-1. Setup APIs of interest:
-
-   - LLMs of interest can be setup in the `llm_utils.py` file
-   - Individual API keys will need to be generated for each model of interest to fully run each notebook using the selected API (see below for instructions). API keys should be saved in a .env file in the root directory.
-
-     Example:
-
-     ANTHROPIC_API_KEY=your_anthropic_key_here
-
-     GEMINI_API_KEY=your_gemini_key_here
-
-     OPENAI_API_KEY=your_openai_key_here
-
-2. Install dependencies: This will install all necessary packages including API clients as well as data processing libraries. This repository now uses [UV](https://docs.astral.sh/uv/) for Python dependency and project management. You can install UV with the following command, `curl -LsSf https://astral.sh/uv/install.sh | sh` or browse the [Installation Methods](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) page in the documentation.
-
-3. Start Jupyter: Start Jupyter to explore and run the notebooks.
-   Jupyter notebooks can be run locally using the command line or by opening notebook files in IDEs of choice.
-
-   To open a file using the command line, run `jupyter notebook`
-   This will open a web browser showing the Jupyter file explorer. Navigate to the notebook you want to run and click on it.
-
-4. Configure APIs: Configurations for individual APIs can be changed in the llm_utils.py file depending on rate/token limits of user's accounts.
-
 ## LLM Set Up
 
-While developing the pipeline, this project primarily experimented with Claude, Gemini, and ChatGPT LLM APIs. To use the notebooks in their current format, individual API keys will need to be generated for each model of interest. Information on how to obtain API keys for Anthropic (Claude), OpenAI (ChatGPT), and Google (Gemini) can be found below.
+While developing the pipeline, this project primarily experimented with Claude, Gemini, and ChatGPT LLM APIs. To use the pipeline in its current form, individual API keys will need to be generated for each model of interest. Information on how to obtain API keys for Anthropic (Claude), OpenAI (ChatGPT), and Google (Gemini) can be found below.
 
 ### Anthropic
 
