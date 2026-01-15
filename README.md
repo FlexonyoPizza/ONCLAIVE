@@ -2,7 +2,11 @@
 
 ## Overview
 
-This repository includes a set of scripts that are run together as part of a pipeline to take in a FHIR implementation guide, extract requirements, generate a test plan, and develop Inferno test kits to test API standards conformance. Each phase of the pipeline uses generative AI to review IG-related inputs and create the outputs for the next phase of the pipeline.
+This repository includes:
+
+- `pipeline/`: A set of scripts that are run together as part of a pipeline to take in an HL7® FHIR® Implementation Guide, extract requirements, generate a test plan, and develop Inferno Test Kits to test API standards conformance by using generative AI to review IG-related inputs and create the outputs for each phase of the pipeline.
+- `full_pipeline.ipynb` / `full_pipeline_demo.ipynb`: Optional Jupyter notebooks to use for running and visualizing each step of the pipeline.
+- `us_core_differences`: Directory that contains scripts for detecting requirements differences between difference versions of the US Core Implementation Guide.
 
 ## Input/Output Artifacts
 
@@ -10,7 +14,7 @@ When running the pipeline, the user specifies a folder as a location for all of 
 
 ## Running the Pipeline
 
-After performing initial setup, the pipeline can be run using the command line or a jupyter notebook.
+After performing initial setup, the pipeline can be run using the command line or the Jupyter notebook in `pipeline/full_pipeline_demo.ipynb`.
 
 ### Initial Setup
 
@@ -18,8 +22,8 @@ After cloning the repository:
 
 1. Setup APIs of interest:
 
-   - LLMs of interest can be setup in the `llm_utils.py` file
-   - Individual API keys will need to be generated for each model of interest to fully run each notebook using the selected API (see below for instructions). API keys should be saved in a .env file in the root directory.
+   - LLMs of interest can be setup in the `llm_utils.py` file in the `pipeline` directory.
+   - Individual API keys will need to be generated for each model of interest to fully run each notebook or file using the selected API (see [LLM Setup](#llm-set-up) for instructions). API keys should be saved in a `.env` file in the root directory.
 
      Example:
 
@@ -29,9 +33,17 @@ After cloning the repository:
 
      OPENAI_API_KEY=your_openai_key_here
 
-2. Install dependencies: This will install all necessary packages including API clients as well as data processing libraries. This repository now uses [UV](https://docs.astral.sh/uv/) for Python dependency and project management. You can install UV with the following command, `curl -LsSf https://astral.sh/uv/install.sh | sh` or browse the [Installation Methods](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) page in the documentation.
+2. Install dependencies:
 
-3. Place the html files from the IG you're running the pipeline against in `YOUR_ARTIFACTS_FOLDER/ig/site`.
+   This repository uses [UV](https://docs.astral.sh/uv/) for Python dependency and project management. You can install UV with the following command, `curl -LsSf https://astral.sh/uv/install.sh | sh` or browse the [Installation Methods](https://docs.astral.sh/uv/getting-started/installation/#installation-methods) page in the documentation. Once installed, run the following command in the root directory of this repository:
+
+   ```shell
+   uv sync
+   ```
+
+   This will install all necessary packages including API clients as well as data processing libraries that are present in the `uv.lock` and `pyproject.toml` files and creates (or updates) a virtual environment in `.venv` by default.
+
+3. Place the HTML files from the IG you're running the pipeline against in `YOUR_ARTIFACTS_FOLDER/ig/site`.
 
 ### Command Line
 
@@ -69,30 +81,38 @@ The entire pipeline can be run using the Jupyter notebook `full_pipeline.ipynb` 
 
 1. Implementation Guide Prep:
 
-- `HTML_narrative_extractor_01.py`: Notebook to convert local HTML files (downloaded IG) to Markdown format. First step of pipeline
-- `markdown_cleaner_02.py`: Notebook to clean unnecessary content from IG files converted to Markdown format. Second step of pipeline
-- `checkpoints/markdown1`: Outputs from the HTML extraction will save here
-- `checkpoints/markdown2`: Outputs from the markdown cleaner will save here
+Script: `process_ig.py`
+Command Line Command: `uv run pipeline/process_ig.py`
+Helper Files:
+
+- `html_narrative_extractor_01.py`: File with helper functions to convert local HTML files (downloaded IG) to markdown format.
+- `markdown_cleaner_02.py`: File with helper functions to clean unnecessary content from IG files converted to markdown format.
 
 2. Requirements Extraction:
-   Scripts to extract requirements using an LLM from the Plan Net IG.
 
-- `reqs_extraction_03.py`: Script that uses an LLM to extract requirements from the Plan Net IG. Third step of pipeline
-- `reqs_reviewer_04.py`: Notebook to review set of requirements using an LLM and output a refined set. Fourth step of pipeline
-- `requirement_downselect_05.py`: Notebook to review multiple sets of requirements in markdown files and identify the total set of requirements across input lists, while removing duplicates. Fifth step of pipeline
-- `checkpoints/requirements_extraction`: Outputs from first requirements extraction step will save here
-- `checkpoints/requirements_refinement`: Outputs from first requirements extraction step will save here
-- `checkpoints/requirements_downselect`: Outputs from requirements downselect step will save here
+Script: `extract_requirements.py`
+Command Line Command: `uv run pipeline/extract_requirements.py`
+Helper Files:
+
+- `reqs_extraction_03.py`: File with helper functions that use an LLM to extract requirements from the input IG.
+- `reqs_reviewer_04.py`: File with helper functions to review set of requirements using an LLM and output a refined set.
+- `requirement_downselect_05.py`: File with helper functions to review multiple sets of requirements in markdown files and identify the total set of requirements across input lists, while removing duplicates.
 
 3. Test Plan Generation
 
-- `test_plan_06.py`: Notebook to convert a list of requirements to a test plan, using an LLM. Sixth step of pipeline
-- `checkpoints/testplan_generation`: Outputs from test plan generation step will save here
+Script: `generate_test_plan.py`
+Command Line Command: `uv run pipeline/generate_test_plan.py`
+Helper Files:
+
+- `test_plan_06.py`: File with helper functions to convert a list of requirements to a test plan, using an LLM.
 
 4. Test Kit Generation
 
-- `test_kit_07.py`: Notebook to take in a test plan and develop a set of tests to cover the testable IG requirements. Seventh step of pipeline
-- `checkpoints/test_kit_generation`: Outputs from test kit generation step will save here
+Script: `generate_tests.py`
+Command Line Command: `uv run pipeline/generate_tests.py`
+Helper Files:
+
+- `test_kit_07.py`: File with helper functions to take in a test plan and develop a set of tests to cover the testable IG requirements.
 
 ## LLM Set Up
 
