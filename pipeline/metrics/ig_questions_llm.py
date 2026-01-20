@@ -14,8 +14,8 @@ from typing import List, Dict, Tuple
 # ---------- CONFIG ----------
 LLM_UTILS_PATH = "pipeline/llm_utils.py"
 ENV_PATH       = "./.env"
-IG_MD_DIR      = "pipeline/checkpoints/markdown2_site"
-PROMPT_PATH    = "prompts/ig_questions_new.txt"
+IG_MD_DIR      = "demo-artifacts/ig/cleaned_markdown"
+PROMPT_PATH    = "pipeline/metrics/prompts/ig_questions.txt"
 OUT_DIR        = "./reports"
 
 API_TYPE       = "claude"

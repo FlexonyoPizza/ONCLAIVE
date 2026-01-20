@@ -13,9 +13,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # ---------- CONFIG ----------
 LLM_UTILS_PATH = "pipeline/llm_utils.py"
 ENV_PATH       = "./.env"
-REQ_PATH       = "pipeline/checkpoints/claude_reqs_list_v2_20250730_122703.md"  #TODO: Dynamically update with appropriate file path
-TEST_PLAN_PATH = "pipeline/checkpoints/claude_test_plan_20250730_140520.md"  #TODO: Dynamically update with appropriate file path
-PROMPT_PATH    = "prompts/requirements_coverage.txt"
+REQ_PATH       = "demo-artifacts/requirements/final/consolidated_reqs.md"  #TODO: Dynamically update with appropriate file path
+TEST_PLAN_PATH = "demo-artifacts/test_plan/test_plan.md"  #TODO: Dynamically update with appropriate file path
+PROMPT_PATH    = "pipeline/metrics/prompts/requirements_coverage.txt"
 OUT_DIR        = "./reports"
 
 API_TYPE       = "claude"

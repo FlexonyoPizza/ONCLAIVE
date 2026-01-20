@@ -10,10 +10,10 @@ Outputs:
 """
 
 from __future__ import annotations
-import os, re, json, time, random
+import re, json, time, random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from difflib import SequenceMatcher
 from collections import Counter
@@ -23,13 +23,14 @@ from collections import Counter
 LLM_UTILS_PATH    = "pipeline/llm_utils.py"
 ENV_PATH          = "./.env"
 
-V1_ROOT           = "pipeline/checkpoints/us_core_claude_828"
-V2_ROOT           = "pipeline/checkpoints/us_core"
+# REPLACE with the paths of the two test kits versions you want to compare
+V1_ROOT           = "demo-artifacts/tests"
+V2_ROOT           = "demo-artifacts/tests"
 
 OUT_DIR           = "./reports_compare_kits"
 CHK_DIR           = Path(OUT_DIR) / ".chk"
 
-PROMPT_DIR        = Path("prompts/repeatability.txt")
+PROMPT_DIR        = Path("pipeline/metrics/prompts/repeatability.txt")
 
 API_TYPE          = "claude"     # must exist in your llm_utils.API_CONFIGS
 MAX_TOKENS        = 16000        
