@@ -10,8 +10,10 @@ demo_artifacts_path = "demo-artifacts"
 parser = argparse.ArgumentParser(
     description="Convert html IG files into cleaned markdown files"
 )
+
 parser.add_argument(
     'artifacts_dir',
+    nargs="?",
     default=demo_artifacts_path,
     help="Relative path to the base artifacts directory"
 )
