@@ -14,7 +14,7 @@ from typing import List, Dict, Tuple
 # ---------- CONFIG ----------
 LLM_UTILS_PATH = "pipeline/llm_utils.py"
 ENV_PATH       = "./.env"
-IG_MD_DIR      = "demo-artifacts/ig/cleaned_markdown"
+IG_MD_DIR      = "demo-artifacts/ig/cleaned_markdown" #TODO: Dynamically update with appropriate file path
 PROMPT_PATH    = "pipeline/metrics/prompts/ig_questions.txt"
 OUT_DIR        = "./reports"
 

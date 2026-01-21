@@ -26,8 +26,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 LLM_UTILS_PATH    = "pipeline/llm_utils.py"
 ENV_PATH          = "./.env"
 
-TEST_PLAN_PATH    = "demo-artifacts/test_plan/test_plan.md"
-TEST_KIT_ROOT     = "demo-artifacts/tests"
+TEST_PLAN_PATH    = "demo-artifacts/test_plan/test_plan.md" #TODO: Dynamically update with appropriate file path
+TEST_KIT_ROOT     = "demo-artifacts/tests" #TODO: Dynamically update with appropriate file path
 
 PROMPT_PATH       = "pipeline/metrics/prompts/test_plan_coverage.txt"
 DSL_GUIDANCE_PATH = "dsl-guidance.md"

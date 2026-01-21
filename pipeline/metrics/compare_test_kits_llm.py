@@ -24,8 +24,8 @@ LLM_UTILS_PATH    = "pipeline/llm_utils.py"
 ENV_PATH          = "./.env"
 
 # REPLACE with the paths of the two test kits versions you want to compare
-V1_ROOT           = "demo-artifacts/tests"
-V2_ROOT           = "demo-artifacts/tests"
+V1_ROOT           = "demo-artifacts/tests" #TODO: Dynamically update with appropriate file path
+V2_ROOT           = "demo-artifacts/tests" #TODO: Dynamically update with appropriate file path
 
 OUT_DIR           = "./reports_compare_kits"
 CHK_DIR           = Path(OUT_DIR) / ".chk"
