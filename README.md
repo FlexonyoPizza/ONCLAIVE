@@ -5,7 +5,7 @@
 This repository includes:
 
 - `pipeline/`: A set of scripts that are run together as part of a pipeline to take in an HL7® FHIR® Implementation Guide, extract requirements, generate a test plan, and develop Inferno Test Kits to test API standards conformance by using generative AI to review IG-related inputs and create the outputs for each phase of the pipeline.
-- `full_pipeline.ipynb` / `full_pipeline_demo.ipynb`: Optional Jupyter notebooks to use for running and visualizing each step of the pipeline.
+- `full_pipeline.ipynb`: Optional Jupyter notebook to use for running and visualizing each step of the pipeline.
 - `us_core_differences`: Directory that contains scripts for detecting requirements differences between difference versions of the US Core Implementation Guide.
 
 ## Input/Output Artifacts
@@ -14,14 +14,13 @@ When running the pipeline, the user specifies a folder as a location for all of 
 
 ## Running the Pipeline
 
-After performing initial setup, the pipeline can be run using the command line or the Jupyter notebook in `pipeline/full_pipeline_demo.ipynb`.
+After performing initial setup, the pipeline can be run using the command line or the Jupyter notebook in `pipeline/full_pipeline.ipynb`.
 
 ### Initial Setup
 
 After cloning the repository:
 
 1. Setup APIs of interest:
-
    - LLMs of interest can be setup in the `llm_utils.py` file in the `pipeline` directory.
    - Individual API keys will need to be generated for each model of interest to fully run each notebook or file using the selected API (see [LLM Setup](#llm-set-up) for instructions). API keys should be saved in a `.env` file in the root directory.
 
@@ -67,6 +66,8 @@ If no other arguments are provided, the scripts will use the [demo-artifacts fol
    This will open a web browser showing the Jupyter file explorer. Navigate to the notebook you want to run and click on it.
 
 2. Configure APIs: Configurations for individual APIs can be changed in the llm_utils.py file depending on rate/token limits of user's accounts.
+
+3. Determine input source IG files and prompts by setting the `base_artifacts_directory` in the notebook. The notebook default sets the `base_artifacts_directory` to the `../demo-artifacts` directory, which contains only the US Core Implementation Guide `CapabilityStatement-us-core-server.html` for demonstration purposes. To run the pipeline on the entirely of US Core Implementation Guide, change `base_artifacts_directory` to `../us-core`.
 
 ## Pipeline Scripts & Files
 
