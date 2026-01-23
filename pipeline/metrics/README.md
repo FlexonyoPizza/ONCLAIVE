@@ -1,6 +1,6 @@
 # LLM-Based Metrics
 
-The Python scripts in this folder are to aid in the automated analysis of FHIR test kit development. These scrips should provide comprehensive coverage analysis, question extraction, and test kit comparison capabilities.
+The Python scripts in this folder are to aid in the automated analysis of FHIR test kit development. These scripts should provide comprehensive coverage analysis, question extraction, and test kit comparison capabilities.
 
 ## Overview
 
@@ -14,10 +14,6 @@ There are five main analysis scripts designed to work with the artifacts that ar
 
 ## Prerequisites
 
-- Required dependencies (install via pip):
-  ```bash
-  pip install python-dotenv
-  ```
 - LLM API access (Claude, GPT, or other supported models)
 - `.env` file with API credentials
 
@@ -34,9 +30,11 @@ All scripts use a common configuration pattern at the top of each file. Key sett
 ### Environment Setup
 
 Be sure to have a `.env` file in the project root:
+
 ```
 ANTHROPIC_API_KEY=your_claude_key_here
 OPENAI_API_KEY=your_openai_key_here
+GEMINI_API_KEY=your_gemini_key_here
 ```
 
 ## Scripts
@@ -46,23 +44,27 @@ OPENAI_API_KEY=your_openai_key_here
 Extracts implementation questions from markdown files at scale with intelligent batching.
 
 **Features:**
+
 - Batches multiple markdown files per LLM call to reduce API costs
 - Handles large files by splitting into sections
 - Exponential backoff for rate limiting
 - Per-file JSON and Markdown output
 
 **Usage:**
+
 ```bash
-python3 pipeline/metrics/ig_questions_llm.py
+uv run pipeline/metrics/ig_questions_llm.py
 ```
 
 **Configuration:**
+
 - `IG_MD_DIR`: Directory containing markdown files
-- `PROMPT_PATH`: Path to question extraction prompt `prompts/ig_questions.txt`
+- `PROMPT_PATH`: Path to question extraction prompt `pipeline/metrics/prompts/ig_questions.txt`
 - `MAX_CHARS_PER_CALL`: Character limit per API call
 - `MAX_FILES_PER_CALL`: File limit per batch
 
 **Output:**
+
 - `reports/<filename>_ig_questions.json`
 - `reports/<filename>_ig_questions.md`
 
@@ -71,6 +73,7 @@ python3 pipeline/metrics/ig_questions_llm.py
 Analyzes test coverage against detailed test plans with exact requirement matching.
 
 **Features:**
+
 - Anchor-based plan excerpt extraction
 - REQ range selection (`--req "1-123,1000-1228,77"`)
 - Per-batch checkpointing for resumability
@@ -78,18 +81,21 @@ Analyzes test coverage against detailed test plans with exact requirement matchi
 - Selective redo capability
 
 **Usage:**
+
 ```bash
-python3 pipeline/metrics/test_plan_coverage_llm.py [--req "1-100"] [--redo]
+uv run pipeline/metrics/test_plan_coverage_llm.py [--req "1-100"] [--redo]
 ```
 
 **Configuration:**
+
 - `TEST_PLAN_PATH`: Path to test plan markdown
 - `TEST_KIT_ROOT`: Root directory of Ruby test files
 - `REQ range selection`: Filter specific requirements
 
 **Output:**
-- `reports_plannet_test_plan/test_plan_coverage.json`
-- `reports_plannet_test_plan/test_plan_coverage.md`
+
+- `reports_test_plan/test_plan_coverage.json`
+- `reports_test_plan/test_plan_coverage.md`
 - Checkpoints in `.chk/` directory
 
 ### 3. Requirements Coverage Checker (`requirements_coverage_llm.py`)
@@ -97,22 +103,26 @@ python3 pipeline/metrics/test_plan_coverage_llm.py [--req "1-100"] [--redo]
 Evaluates how well test plans cover specified requirements with preprocessing optimization.
 
 **Features:**
+
 - Table of contents parsing for grouping
 - Relevant test content extraction
 - Concurrent batch processing
 - Coverage percentage calculation
 
 **Usage:**
+
 ```bash
-python3 pipeline/metrics/requirements_coverage_llm.py
+uv run pipeline/metrics/requirements_coverage_llm.py
 ```
 
 **Configuration:**
+
 - `REQ_PATH`: Requirements markdown file
 - `TEST_PLAN_PATH`: Test plan markdown file
 - `ENABLE_PREPROCESSING`: Toggle optimization features
 
 **Output:**
+
 - `reports/requirements_coverage.json`
 - `reports/requirements_coverage.md`
 
@@ -121,6 +131,7 @@ python3 pipeline/metrics/requirements_coverage_llm.py
 Compares two versions of test implementations for repeatability analysis.
 
 **Features:**
+
 - Semantic similarity scoring (0.0-1.0)
 - Heuristic + LLM-based analysis
 - Best-match pairing of test files
@@ -128,16 +139,19 @@ Compares two versions of test implementations for repeatability analysis.
 - Per-requirement checkpointing
 
 **Usage:**
+
 ```bash
-python3 pipeline/metrics/compare_test_kits_llm.py
+uv run pipeline/metrics/compare_test_kits_llm.py
 ```
 
 **Configuration:**
+
 - `V1_ROOT`: First version directory
 - `V2_ROOT`: Second version directory
 - `REQ_FILTER`: Optional requirement range filter
 
 **Output:**
+
 - `reports_compare_kits_*/compare_report.json`
 - `reports_compare_kits_*/compare_report.md`
 
@@ -146,11 +160,13 @@ python3 pipeline/metrics/compare_test_kits_llm.py
 Aggregates question counts across all analysis reports.
 
 **Usage:**
+
 ```bash
-python summary_questions.py
+uv run summary_questions.py
 ```
 
 **Output:**
+
 - `reports/question_count_summary.json`
 
 ## LLM Integration
@@ -168,11 +184,13 @@ if API_TYPE in API_CONFIGS:
 
 client = LLMApiClient(config=API_CONFIGS)
 ```
-Temperature can be configured here or within the LLM utils file. 
+
+Temperature can be configured here or within the LLM utils file.
 
 ### Error Handling
 
 All scripts include error handling:
+
 - Exponential backoff with jitter for rate limits
 - Checkpoint-based resumability
 - Graceful handling of malformed responses
@@ -181,14 +199,18 @@ All scripts include error handling:
 ## Output Formats
 
 ### JSON Reports
+
 Machine-readable structured data with:
+
 - Summary statistics
 - Per-item details
 - Scoring metrics
 - Evidence references
 
 ### Markdown Reports
+
 Human-readable summaries with:
+
 - Coverage percentages
 - Requirement breakdowns
 - Issue lists with checkboxes
@@ -198,19 +220,24 @@ Human-readable summaries with:
 
 ```
 project/
+├── demo-artifacts/
 ├── pipeline/
 │   ├── llm_utils.py
-│   └── checkpoints/
-│       ├── markdown2_site/     # Cleaned IG markdown files
-│       ├── gemini_8_13/        # Example Test kit version 1
-│       └── gemini_7_30/        # Example Test kit version 2
-├── prompts/
-│   ├── ig_questions_new.txt
-│   ├── test_plan_coverage.txt
-│   └── requirements_coverage.txt
-├── reports/                    # Output directory
-├── .env                       # API credentials
-└── dsl-guidance.md            # DSL reference
+│   ├── dsl-guidance.md        # DSL reference
+│   └── metrics/
+│     ├── compare_test_kits_llm.py
+│     ├── ig_questions_llm.py
+│     ├── requirements_coverage_llm.py
+│     ├── summary_questions.py
+│     ├── test_plan_coverage_llm.py
+│     ├── README.md
+|     └── prompts/
+│       ├── ig_questions.txt
+│       ├── repeatability.txt
+│       ├── requirements_coverage.txt
+│       └── test_plan__coverage.txt
+├── reports/                   # Output directory
+└── .env                       # API credentials
 ```
 
 ## Performance Optimization
@@ -224,7 +251,7 @@ project/
 ## Best Practices
 
 1. **Start Small**: Test with a subset of requirements first
-2. **Monitor Costs**: LLM API calls can be expensive at scale. Monitor costs using the API console dashboards. 
+2. **Monitor Costs**: LLM API calls can be expensive at scale. Monitor costs using the API console dashboards.
 3. **Review Outputs**: LLM analysis should be validated by domain experts
 4. **Checkpoint Management**: Use `--redo` selectively to avoid unnecessary re-processing
 5. **Batch Sizing**: Adjust `MAX_CHARS_PER_CALL` based on your LLM's context limits
@@ -241,6 +268,7 @@ project/
 ### Debug Mode
 
 Most scripts include preview output:
+
 ```python
 RAW_PREVIEW = 800  # Characters to preview from LLM responses
 ```

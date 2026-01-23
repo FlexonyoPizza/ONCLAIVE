@@ -12,9 +12,9 @@ Optimized for efficiency and rate-limit resilience:
 - Selective redo that deletes only targeted checkpoints (--redo)
 
 Outputs:
-  reports_uscore_full/test_plan_coverage.json
-  reports_uscore_full/test_plan_coverage.md
-  reports_uscore_full/.chk/<REQ>__batch_###.json  (checkpoints)
+  reports_test_plan/test_plan_coverage.json
+  reports_test_plan/test_plan_coverage.md
+  reports_test_plan/.chk/<REQ>__batch_###.json  (checkpoints)
 """
 
 import sys, re, os, json, time, random, argparse, glob
@@ -26,13 +26,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 LLM_UTILS_PATH    = "pipeline/llm_utils.py"
 ENV_PATH          = "./.env"
 
-TEST_PLAN_PATH    = "pipeline/checkpoints/claude_test_plan_20250730_140520.md"
-TEST_KIT_ROOT     = "pipeline/checkpoints/gemini_8_13"
+TEST_PLAN_PATH    = "demo-artifacts/test_plan/test_plan.md" #TODO: Dynamically update with appropriate file path
+TEST_KIT_ROOT     = "demo-artifacts/tests" #TODO: Dynamically update with appropriate file path
 
-PROMPT_PATH       = "prompts/test_plan_coverage.txt"
+PROMPT_PATH       = "pipeline/metrics/prompts/test_plan_coverage.txt"
 DSL_GUIDANCE_PATH = "dsl-guidance.md"
 
-OUT_DIR           = "./reports_plannet_test_plan"
+OUT_DIR           = "./reports_test_plan"
 CHK_DIR           = Path(OUT_DIR) / ".chk"   # per-batch checkpoint folder
 
 API_TYPE          = "claude"
