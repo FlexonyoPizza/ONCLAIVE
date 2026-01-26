@@ -258,10 +258,10 @@ def _is_url(path_or_url: str) -> bool:
     return path_or_url.startswith(('http://', 'https://'))
 
 def download_and_extract_ig_html(
-    old_ig_location: str,
     new_ig_location: str,
     artifacts_dir: str,
-    verbose: bool = False
+    verbose: bool = False,
+    old_ig_location: str | None = None,
 ) -> dict:
     """
     Download or load two specified IG sources and extract all html files to separate folders.

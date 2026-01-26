@@ -15,6 +15,24 @@ SYSTEM_PROMPTS = {
     "aip": """As a Healthcare Integration Test Engineer with expertise determining the requirements present in FHIR Implementation Guides, analyze these IG narratives for differences in requirements."""
 }
 
+def create_requirements_ig_difference_prompt(new_ig_content: str, old_ig_requirements_content: str, artifacts_dir: str) -> str:
+    """
+    Docstring for create_requirements_ig_difference_prompt
+    
+    :param new_ig_content: Description
+    :type new_ig_content: str
+    :param old_ig_requirements_content: Description
+    :type old_ig_requirements_content: str
+    :param artifacts_dir: Description
+    :type artifacts_dir: str
+    :return: Description
+    :rtype: str
+    """
+
+    prompt = prompt_utils.load_prompt(
+        
+    )
+
 def create_difference_prompt(new_ig_content: str, old_ig_content: str, artifacts_dir: str) -> str:
     """
     Create a prompt for finding differences between IG versions.
