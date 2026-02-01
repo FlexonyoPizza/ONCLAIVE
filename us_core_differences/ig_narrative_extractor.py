@@ -395,7 +395,7 @@ def _extract_html_files(zip_path: str, target_dir: Path, verbose: bool = True) -
 
     files_to_skip = [
         "artifacts.html",
-        "capability-statements.html",
+        # "capability-statements.html", # May want to remove this one?
         "changes-between-versions.html",
         "changes.html",
         "conformance.html",
@@ -455,7 +455,7 @@ def _extract_html_files(zip_path: str, target_dir: Path, verbose: bool = True) -
                     continue
 
                 # Skip documentation for resources which aren't StructureDefinitions (terminology and examples)
-                if safe_filename[0].isupper() and not safe_filename.startswith('StructureDefinition'):
+                if safe_filename[0].isupper() and not (safe_filename.startswith('StructureDefinition') or safe_filename.startswith('CapabilityStatement')):
                     continue
 
                 pattern_to_skip = False

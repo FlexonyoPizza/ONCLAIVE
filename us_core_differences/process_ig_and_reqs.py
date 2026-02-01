@@ -1,5 +1,6 @@
 import argparse
 import ig_narrative_extractor
+import ig_requirements_extractor
 import markdown_cleaner
 import os
 
@@ -15,6 +16,12 @@ parser.add_argument(
     'artifacts_dir',
     default=us_core_ig_path,
     help="Relative path to the base artifacts directory"
+)
+
+parser.add_argument(
+    '-o', '--old-reqs-location',
+    required=True,
+    help="Relative file path of the old IG requirements Excel spreadsheet"
 )
 
 parser.add_argument(
@@ -39,6 +46,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 relative_artifacts_dir = args.artifacts_dir
+old_reqs_location = args.old_reqs_location
 new_ig_location = args.new_ig_location
 verbose = args.verbose
 exclude_patterns = args.exclude_pattern
@@ -57,6 +65,13 @@ result = ig_narrative_extractor.convert_local_html_to_markdown(
     exclude_patterns=exclude_patterns
 )
 
+ig_requirements_extractor.load_and_extract_ig_requirements(
+    old_requirements_path=old_reqs_location,
+    artifacts_dir=final_artifacts_dir,
+    verbose=verbose
+)
+
 markdown_cleaner.process_directory(
     artifacts_dir=final_artifacts_dir
 )
+
