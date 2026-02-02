@@ -42,8 +42,12 @@ load_dotenv()
 # API Configuration
 API_CONFIGS = {
     "claude": {
-        "model_name": "claude-sonnet-4-20250514", 
-        "max_tokens": 8192,
+        "model_name": "claude-sonnet-4-0",
+        "max_tokens": 16384,
+        "thinking": {
+            "type": "enabled",
+            "budget_tokens": 8192
+        },
         "temperature": 0,
         "batch_size": 10,  
         "delay_between_chunks": 0.1, 
@@ -51,11 +55,11 @@ API_CONFIGS = {
         "requests_per_minute": 3800,  
         "input_tokens_per_minute": 1900000,  
         "output_tokens_per_minute": 380000,  
-        "delay_between_requests": 0.2  
+        "delay_between_requests": 0.2
     },
     "gemini": {
-        "model": "models/gemini-1.5-pro",
-        "max_tokens": 8192,
+        "model": "models/gemini-2.5-pro",
+        "max_tokens": 32384,
         "temperature": 0.3,
         "batch_size": 8,  
         "delay_between_chunks": 0.5,  
@@ -63,11 +67,12 @@ API_CONFIGS = {
         "requests_per_minute": 140,  # 93% of 150 RPM
         "tokens_per_minute": 1900000,  # 95% of 2M TPM (combined input+output)
         "max_requests_per_day": 9500,  # 95% of 10k daily
-        "delay_between_requests": 1,  
+        "delay_between_requests": 1,
+        "thinking_level": "high",
         "timeout": 900
     },
     "gpt": {
-        "model": "gpt-5-mini",
+        "model": "gpt-5",
         "max_tokens": 16384,
         "temperature": 1,
         "batch_size": 20,  
@@ -76,7 +81,10 @@ API_CONFIGS = {
         "requests_per_minute": 9500,  # 95% of 5000 RPM
         "tokens_per_minute": 1900000,  # 95% of 800k TPM (combined input+output)
         "max_requests_per_day": 190000000,  # 95% of 100M batch TPD (very high)
-        "delay_between_requests": 0.006 
+        "delay_between_requests": 0.006,
+        "reasoning": {
+            "effort": "high"
+        }
     },
     "aip": {
         'model': 'nvidia/Llama-3_3-Nemotron-Super-49B-v1',
@@ -408,9 +416,17 @@ class LLMApiClient:
                         "role": "user", 
                         "content": prompt
                     }],
-                    system=system_prompt
+                    system=system_prompt,
+                    thinking={
+                        "type": "enabled",
+                        "budget_tokens": 4000
+                    }
                 )
-                return response.content[0].text
+                # print(response)
+                response_text = next(message.text for message in response.content if message.type == 'text')
+                # print(response_text)
+                return response_text
+                # return response.content[0].text
                 
             elif api_type == "gemini":
                 # Combine system prompt and user prompt for Gemini
@@ -468,7 +484,7 @@ class LLMApiClient:
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": prompt}
                     ],
-                    reasoning={"effort": "minimal"},
+                    reasoning={"effort": "medium"},
                     temperature=config["temperature"],
                     max_output_tokens=tokens_limit
                 )
