@@ -395,7 +395,7 @@ def _extract_html_files(zip_path: str, target_dir: Path, verbose: bool = True) -
 
     files_to_skip = [
         "artifacts.html",
-        # "capability-statements.html", # May want to remove this one?
+        "capability-statements.html",
         "changes-between-versions.html",
         "changes.html",
         "conformance.html",
