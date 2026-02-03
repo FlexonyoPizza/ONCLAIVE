@@ -30,7 +30,7 @@ from dotenv import load_dotenv
 
 try:
     from anthropic import Anthropic, RateLimitError
-    import google.generativeai as gemini
+    import google.genai as gemini
     from openai import OpenAI
     from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 except ImportError:
@@ -58,7 +58,7 @@ API_CONFIGS = {
         "delay_between_requests": 0.2
     },
     "gemini": {
-        "model": "models/gemini-2.5-pro",
+        "model": "models/gemini-2.5-flash",
         "max_tokens": 32384,
         "temperature": 0.3,
         "batch_size": 8,  
@@ -68,11 +68,20 @@ API_CONFIGS = {
         "tokens_per_minute": 1900000,  # 95% of 2M TPM (combined input+output)
         "max_requests_per_day": 9500,  # 95% of 10k daily
         "delay_between_requests": 1,
-        "thinking_level": "high",
-        "timeout": 900
+        "thinking_config": {
+            # "thinking_level": "low"
+            "thinking_budget": 0
+        },
+        "timeout": 900,
+        "safety_settings": [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+        ]
     },
     "gpt": {
-        "model": "gpt-5",
+        "model": "gpt-5-mini",
         "max_tokens": 16384,
         "temperature": 1,
         "batch_size": 20,  
@@ -192,24 +201,7 @@ class LLMApiClient:
             # Gemini setup
             gemini_api_key = os.getenv('GEMINI_API_KEY')
             if gemini_api_key:
-                gemini.configure(api_key=gemini_api_key)
-                
-                # Configure safety settings for technical content
-                safety_settings = [
-                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
-                ]
-                
-                self.clients['gemini'] = gemini.GenerativeModel(
-                    model_name=self.config["gemini"]["model"],
-                    generation_config={
-                        "max_output_tokens": self.config["gemini"]["max_tokens"],
-                        "temperature": self.config["gemini"]["temperature"]
-                    },
-                    safety_settings=safety_settings
-                )
+                self.clients['gemini'] = gemini.Client(api_key=gemini_api_key)
             else:
                 self.logger.warning("GEMINI_API_KEY not found. Gemini API client will not be loaded.")
             
@@ -417,29 +409,26 @@ class LLMApiClient:
                         "content": prompt
                     }],
                     system=system_prompt,
-                    thinking={
-                        "type": "enabled",
-                        "budget_tokens": 4000
-                    }
+                    thinking=config["thinking"]
                 )
-                # print(response)
                 response_text = next(message.text for message in response.content if message.type == 'text')
-                # print(response_text)
                 return response_text
-                # return response.content[0].text
-                
+
             elif api_type == "gemini":
                 # Combine system prompt and user prompt for Gemini
                 if system_prompt:
                     combined_prompt = f"System: {system_prompt}\n\nUser: {prompt}"
                 else:
                     combined_prompt = prompt
-                
-                response = client.generate_content(
-                    combined_prompt,
-                    generation_config={
+
+                response = client.models.generate_content(
+                    model=config["model"],
+                    contents=combined_prompt,
+                    config={
+                        "safety_settings": config["safety_settings"],
                         "max_output_tokens": tokens_limit,
-                        "temperature": config["temperature"]
+                        "temperature": config["temperature"],
+                        "thinking_config": config["thinking_config"]
                     }
                 )
                 
@@ -484,7 +473,7 @@ class LLMApiClient:
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": prompt}
                     ],
-                    reasoning={"effort": "medium"},
+                    reasoning=config["reasoning"],
                     temperature=config["temperature"],
                     max_output_tokens=tokens_limit
                 )
