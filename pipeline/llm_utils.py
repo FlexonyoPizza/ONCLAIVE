@@ -58,7 +58,7 @@ API_CONFIGS = {
         "delay_between_requests": 0.2
     },
     "gemini": {
-        "model": "models/gemini-2.5-flash",
+        "model": "models/gemini-2.5-pro",
         "max_tokens": 32384,
         "temperature": 0.3,
         "batch_size": 8,  
@@ -70,7 +70,7 @@ API_CONFIGS = {
         "delay_between_requests": 1,
         "thinking_config": {
             # "thinking_level": "low"
-            "thinking_budget": 0
+            "thinking_budget": -1
         },
         "timeout": 900,
         "safety_settings": [
@@ -92,7 +92,7 @@ API_CONFIGS = {
         "max_requests_per_day": 190000000,  # 95% of 100M batch TPD (very high)
         "delay_between_requests": 0.006,
         "reasoning": {
-            "effort": "high"
+            "effort": "medium"
         }
     },
     "aip": {
