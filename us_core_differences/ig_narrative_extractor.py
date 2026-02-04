@@ -258,10 +258,10 @@ def _is_url(path_or_url: str) -> bool:
     return path_or_url.startswith(('http://', 'https://'))
 
 def download_and_extract_ig_html(
-    old_ig_location: str,
     new_ig_location: str,
     artifacts_dir: str,
-    verbose: bool = False
+    verbose: bool = False,
+    old_ig_location: str | None = None,
 ) -> dict:
     """
     Download or load two specified IG sources and extract all html files to separate folders.
@@ -455,7 +455,7 @@ def _extract_html_files(zip_path: str, target_dir: Path, verbose: bool = True) -
                     continue
 
                 # Skip documentation for resources which aren't StructureDefinitions (terminology and examples)
-                if safe_filename[0].isupper() and not safe_filename.startswith('StructureDefinition'):
+                if safe_filename[0].isupper() and not (safe_filename.startswith('StructureDefinition') or safe_filename.startswith('CapabilityStatement')):
                     continue
 
                 pattern_to_skip = False
