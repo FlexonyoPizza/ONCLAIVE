@@ -10,7 +10,7 @@ import path_helpers
 from dotenv import load_dotenv
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from anthropic import Anthropic, RateLimitError
-import google.generativeai as gemini
+import google.genai as gemini
 from openai import OpenAI
 from pathlib import Path
 import prompt_utils
